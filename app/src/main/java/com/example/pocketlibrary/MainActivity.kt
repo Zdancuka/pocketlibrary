@@ -11,7 +11,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.example.pocketlibrary.ui.theme.PocketLibraryTheme
+import com.example.pocketlibrary.ui.theme.LibraryScreen
+import com.example.pocketlibrary.ui.theme.theme.PocketLibraryTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -19,12 +20,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             PocketLibraryTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "End",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+                LibraryScreen()
             }
         }
     }

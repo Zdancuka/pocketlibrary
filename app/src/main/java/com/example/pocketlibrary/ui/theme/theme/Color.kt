@@ -1,4 +1,4 @@
-package com.example.pocketlibrary.ui.theme
+package com.example.pocketlibrary.ui.theme.theme
 
 import androidx.compose.ui.graphics.Color
 
