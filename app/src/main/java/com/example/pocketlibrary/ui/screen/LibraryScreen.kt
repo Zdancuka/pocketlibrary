@@ -22,11 +22,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.R
+import com.example.pocketlibrary.R
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 
 data class Book(
@@ -41,18 +42,18 @@ fun LibraryScreen(){
     val books: List<Book> = listOf(
         Book(
             title = R.string.book_title,
-            R.string.author_name,
-            R.drawable.book_caver_example,
+            author = R.string.author_name,
+            imageRes = R.drawable.book_caver_example,
+        ),
+        Book(
+            title = R.string.book_long_title,
+            author = R.string.author_name,
+            imageRes = R.drawable.book_caver_example,
         ),
         Book(
             title = R.string.book_title,
-            R.string.author_name,
-            R.drawable.book_caver_example,
-        ),
-        Book(
-            title = R.string.book_title,
-            R.string.author_name,
-            R.drawable.book_caver_example,
+            author = R.string.author_name,
+            imageRes = R.drawable.book_caver_example,
         )
     )
 
@@ -60,8 +61,8 @@ fun LibraryScreen(){
         columns = GridCells.Fixed(2),
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
-            .background(MaterialTheme.colorScheme.surfaceVariant),
+            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .padding(16.dp),
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -79,8 +80,8 @@ fun BookCard(book: Book) {
         modifier = Modifier
             .fillMaxWidth()
             .clickable() { },
+        elevation = CardDefaults.cardElevation(4.dp),
         shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(4.dp)
     ) {
 
         Column (
@@ -102,11 +103,13 @@ fun BookCard(book: Book) {
 
             Text(
                 text = stringResource(book.title),
+                textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.bodyMedium
             )
 
             Text(
-                text = "by ${book.author}",
+                text = "by ${stringResource(book.author)}",
+                textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
