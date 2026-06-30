@@ -1,6 +1,55 @@
 <resources>
     <string name="app_name">Pocket Library</string>
+    <string name="book_details_tags_title">My Tags</string>
+    <string name="book_details_description_title">Description</string>
+    <string name="book_details_notes_title">Notes</string>
+    <string name="show_more">Show more</string>
+    <string name="show_less">Show less</string>
     <string name="book_title">Book Title</string>
     <string name="book_long_title">Book Long Title Example</string>
     <string name="author_name">Author Name</string>
+
+    <string name="book_en_language">EN</string>
+    <string name="book_page_number">420</string>
+    <string name="book_description_example">
+        "Into the Unknown" is a captivating fiction drama
+        novel that weaves a tale of mystery and self-discovery.
+        The story follows Emma Carter, a young woman grappling
+        with the sudden disappearance of her father, a renowned
+        explorer. As she delves into his cryptic journals, Emma
+        uncovers secrets about his expeditions to uncharted
+        territories and the enigmatic clues he left behind.
+        </string>
+    <string name="book_notes_example">I really enjoy rereading it.
+        It\'s a wonderful book to spend time with on a May evening,
+        because I encounter so many interesting stories and people
+        in the community. For the most part, the characters acted
+        logically.</string>
+
+    <string name="tag_romantic">#Romantic</string>
+    <string name="tag_scary">#Scary</string>
+    <string name="tag_idea">#Idea for lunch</string>
+    <string name="tag_dog">#Dog</string>
+    <string name="tag_funny">#Funny act</string>
+    <string name="tag_life">#Life lesson</string>
+    <string name="tag_poem">#Poem</string>
+
+    <string name="save">Save</string>
+    <string name="add_a_book">Add a book</string>
+
+    <string name="title">Title</string>
+    <string name="author">Author</string>
+    <string name="total_pages">Total pages</string>
+    <string name="language">Language</string>
+    <string name="description">Description</string>
+    <string name="notes">Notes</string>
+    <string name="add_tags">Add tags +</string>
+
+    <string name="the_star">The Star</string>
+    <string name="enter_the_author">Enter the author</string>
+    <string name="enter_the_page_number">Enter the page number</string>
+    <string name="enter_the_language">Enter the language</string>
+    <string name="enter_the_description">Enter the description</string>
+    <string name="enter_the_notes">Enter the notes</string>
+
 </resources>

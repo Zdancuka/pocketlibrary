@@ -54,7 +54,28 @@ fun LibraryScreen(){
             title = R.string.book_title,
             author = R.string.author_name,
             imageRes = R.drawable.book_caver_example,
-        )
+        ),
+        Book(
+            title = R.string.book_title,
+            author = R.string.author_name,
+            imageRes = R.drawable.book_caver_example,
+        ),Book(
+            title = R.string.book_title,
+            author = R.string.author_name,
+            imageRes = R.drawable.book_caver_example,
+        ),Book(
+            title = R.string.book_title,
+            author = R.string.author_name,
+            imageRes = R.drawable.book_caver_example,
+        ),Book(
+            title = R.string.book_title,
+            author = R.string.author_name,
+            imageRes = R.drawable.book_caver_example,
+        ),Book(
+            title = R.string.book_title,
+            author = R.string.author_name,
+            imageRes = R.drawable.book_caver_example,
+        ),
     )
 
     LazyVerticalGrid(
