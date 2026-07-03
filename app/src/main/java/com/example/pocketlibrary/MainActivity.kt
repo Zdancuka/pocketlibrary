@@ -11,6 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.example.pocketlibrary.ui.screen.AddBookScreenVisual
 import com.example.pocketlibrary.ui.screen.BookDetailsScreen
 import com.example.pocketlibrary.ui.screen.book
 import com.example.pocketlibrary.ui.theme.LibraryScreen
@@ -23,7 +24,8 @@ class MainActivity : ComponentActivity() {
         setContent {
             PocketLibraryTheme {
                 //LibraryScreen()
-                BookDetailsScreen(book, modifier = Modifier)
+                //BookDetailsScreen(book)
+                AddBookScreenVisual()
             }
         }
     }

@@ -64,7 +64,7 @@ val book = Book(
 )
 
 @Composable
-fun BookDetailsScreen(book: Book, modifier: Modifier = Modifier )
+fun BookDetailsScreen(book: Book)
 {
     Box(
         modifier = Modifier
@@ -115,10 +115,12 @@ fun BookDetailsScreen(book: Book, modifier: Modifier = Modifier )
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
+                horizontalArrangement = Arrangement.SpaceEvenly,
+
             ) {
 
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,) {
                     Icon(
                         painter = painterResource(R.drawable.ic_language),
                         null,
