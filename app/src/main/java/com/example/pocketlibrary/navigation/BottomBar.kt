@@ -35,7 +35,15 @@ fun BottomBar(navController: NavController) {
             horizontalArrangement = Arrangement.SpaceEvenly,
             ) {
 
-            IconButton(onClick = { navController.navigate(Screen.Tags.route) }) {
+            IconButton(onClick = {
+                //Tapping the same tab twice pushes a new copy of the screen onto the back stack.
+                // The idiomatic fix is to use launchSingleTop = true and popUpTo the start destination:
+                navController.navigate(Screen.Tags.route) {
+                    popUpTo(Screen.Library.route) { saveState = true }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            }) {
                 Icon(
                     painter = painterResource(R.drawable.ic_tag),
                     contentDescription = "Tags",

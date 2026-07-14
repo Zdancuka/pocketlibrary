@@ -139,6 +139,7 @@ private fun TagSearchBar() {
 
             Spacer(modifier = Modifier.width(Dimens.SpaceMedium))
 
+            //TextField
             Text(
                 text = stringResource(R.string.tag_romantic),
                 style = MaterialTheme.typography.bodyLarge,
@@ -175,13 +176,13 @@ private fun OutlinedTag(text: Int) {
 }
 
 @Composable
-fun BookTagCard(book: Book) {
+private fun BookTagCard(book: Book) {  //is only used inside TagScreen.kt, so it should be private.
 
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(Dimens.CornerXLarge),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = Dimens.CornerSmall)
+        elevation = CardDefaults.cardElevation(defaultElevation = Dimens.CornerSmall) //corner radius dimension being reused for elevation. Confusing, and not recommended. Should create a new dimension for elevation
     ) {
 
         Row(modifier = Modifier.padding(Dimens.SpaceSmall)) {
@@ -219,6 +220,7 @@ fun BookTagCard(book: Book) {
                     horizontalArrangement = Arrangement.spacedBy(Dimens.SpaceSmall),
                     verticalArrangement = Arrangement.spacedBy(Dimens.SpaceXSmall)
                 ) {
+                    //The number 3 appears twice independently. If someone changes one, the other won't match. Extract it to const something like MAX_TAGS_TO_SHOW = 3 and use it in both places. This will make it easier to change in the future.
                     book.tags.take(3).forEach {
                         OutlinedTag(it)
                     }
