@@ -1,4 +1,4 @@
-package com.example.pocketlibrary.ui.theme.theme
+package com.example.pocketlibrary.ui.theme
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -11,25 +11,54 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+    primary = Primary40,
+    onPrimary = Black,
+    primaryContainer = Black,
+    onPrimaryContainer = Primary10,
+
+    secondary = Secondary40,
+    onSecondary = Black,
+
+    background = Black,
+    onBackground = White,
+
+    surface = Black,
+    onSurface = White,
+
+    surfaceVariant = DarkGray,
+    onSurfaceVariant = LightGray,
+
+    outline = MidGray,
+    outlineVariant = MidGray40,
+
+    error = Error60,
+    onError = White,
 )
 
-private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
 
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+private val LightColorScheme = lightColorScheme(
+    primary = Primary40,
+    onPrimary = Black,
+    primaryContainer = Primary10,
+    onPrimaryContainer = Black,
+
+    secondary = Secondary40,
+    onSecondary = Black,
+
+    background = White,
+    onBackground = Black,
+
+    surface = White,
+    onSurface = Black,
+
+    surfaceVariant = LightGray,
+    onSurfaceVariant = DarkGray,
+
+    outline = MidGray,
+    outlineVariant = MidGray40,
+
+    error = Error60,
+    onError = White,
 )
 
 @Composable

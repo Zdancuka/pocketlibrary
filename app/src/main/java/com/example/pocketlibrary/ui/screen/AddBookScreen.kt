@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
@@ -20,57 +19,55 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import com.example.pocketlibrary.R
+import com.example.pocketlibrary.ui.theme.Dimens
 
 @Composable
 fun AddBookScreenVisual() {
 
-    val chipColor = Color.White
-    val backgroundColor = Color.LightGray
-    val mutedTextColor = Color.LightGray
-
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(backgroundColor)
+            .background(MaterialTheme.colorScheme.surfaceVariant)
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 20.dp, vertical = 20.dp)
+            .padding(horizontal = Dimens.SpaceLarge, vertical = Dimens.SpaceLarge)
     ) {
 
         Text(
             text = stringResource(R.string.save),
             modifier = Modifier.align(Alignment.CenterHorizontally),
             fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(Dimens.SpaceXLarge))
 
         Text(
             text = stringResource(R.string.add_a_book),
             fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(Dimens.SpaceXXLarge))
 
         Box(
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
-                .width(100.dp)
-                .height(145.dp)
-                .clip(RoundedCornerShape(12.dp))
-                .background(Color.White)
-                .border(1.dp, Color.LightGray, RoundedCornerShape(12.dp)),
+                .width(Dimens.ImagePlaceholderWidth)
+                .height(Dimens.ImagePlaceholderHeight)
+                .clip(RoundedCornerShape(Dimens.CornerLarge))
+                .background(MaterialTheme.colorScheme.background)
+                .border(Dimens.BorderThin, MaterialTheme.colorScheme.surface, RoundedCornerShape(Dimens.CornerLarge)),
             contentAlignment = Alignment.Center
         ) {
 
@@ -81,24 +78,24 @@ fun AddBookScreenVisual() {
 
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(Dimens.SpaceMedium))
 
         LabeledField(
             label = R.string.title,
             value = R.string.the_star
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(Dimens.SpaceXLarge))
 
         LabeledField(
             label = R.string.author,
             value = R.string.enter_the_author
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(Dimens.SpaceXLarge))
 
         Row (
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+            horizontalArrangement = Arrangement.spacedBy(Dimens.SpaceMedium)
         ) {
 
             Box(modifier = Modifier.weight(1f)) {
@@ -116,14 +113,14 @@ fun AddBookScreenVisual() {
             }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(Dimens.SpaceXLarge))
 
         LabeledMultilineField(
             label = R.string.description,
             value = R.string.enter_the_description,
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(Dimens.SpaceXLarge))
 
         Row(
             verticalAlignment = Alignment.CenterVertically
@@ -134,60 +131,54 @@ fun AddBookScreenVisual() {
                 contentDescription = null,
             )
 
-            Spacer(modifier = Modifier.width(10.dp))
+            Spacer(modifier = Modifier.width(Dimens.SpaceSmall))
 
             Text(
                 text = stringResource(R.string.add_tags),
                 fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurface
             )
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(Dimens.SpaceMedium))
 
         FlowRow (
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+            horizontalArrangement = Arrangement.spacedBy(Dimens.SpaceSmall),
+            verticalArrangement = Arrangement.spacedBy(Dimens.SpaceSmall)
         ) {
 
-            listOf(
-                R.string.tag_romantic,
-            ).forEach { tag ->
-
-                Surface (
-                    color = chipColor,
-                    shape = RoundedCornerShape(6.dp)
+            listOf(R.string.tag_romantic).forEach { tag ->
+                Surface(
+                    color = MaterialTheme.colorScheme.primaryContainer,
+                    shape = RoundedCornerShape(Dimens.CornerPill)
                 ) {
-
                     Text(
-                        text = stringResource(tag),
-                        modifier = Modifier.padding(
-                            horizontal = 12.dp,
-                            vertical = 6.dp
-                        ),
-                        color = mutedTextColor,
+                        text = "#" + stringResource(tag),
+                        modifier = Modifier.padding(horizontal = Dimens.SpaceSmall, vertical = Dimens.SpaceXSmall),
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
                     )
                 }
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(Dimens.SpaceMedium))
 
         LabeledMultilineField(
             label = R.string.notes,
             value = R.string.enter_the_notes,
         )
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(Dimens.SpaceXXXLarge))
 
         Button (
             onClick = {},
             modifier = Modifier
                 .fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color.Green,
-                contentColor = Color.White
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary
             ),
-            shape = RoundedCornerShape(4.dp)
+            shape = RoundedCornerShape(Dimens.CornerXSmall)
         ) {
             Text(
                 text = stringResource(R.string.save),
@@ -195,7 +186,7 @@ fun AddBookScreenVisual() {
             )
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(Dimens.SpaceMedium))
     }
 }
 
@@ -209,23 +200,24 @@ private fun LabeledField(
     Column(modifier = modifier) {
         Text(
             text = stringResource(label),
+            color = MaterialTheme.colorScheme.onSurface
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(Dimens.SpaceXSmall))
 
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(4.dp))
-                .background(Color.White)
-                .padding(10.dp)
-                .height(32.dp),
+                .clip(RoundedCornerShape(Dimens.CornerXSmall))
+                .background(MaterialTheme.colorScheme.background)
+                .padding(Dimens.SpaceSmall)
+                .height(Dimens.InputFieldHeight),
             contentAlignment = Alignment.CenterStart
         ) {
             Text(
                 text = stringResource(value),
-                modifier = Modifier.padding(horizontal = 10.dp),
-                color = Color.Gray,
+                modifier = Modifier.padding(horizontal = Dimens.SpaceSmall),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
     }
@@ -240,21 +232,22 @@ private fun LabeledMultilineField(
     Column (modifier = modifier) {
         Text(
             text = stringResource(label),
+            color = MaterialTheme.colorScheme.onSurface
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(Dimens.SpaceMedium))
 
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(4.dp))
-                .background(Color.White),
+                .clip(RoundedCornerShape(Dimens.CornerXSmall))
+                .background(MaterialTheme.colorScheme.background),
             contentAlignment = Alignment.TopStart
         ) {
             Text(
                 text = stringResource(value),
-                modifier = Modifier.padding(20.dp),
-                color = Color.Gray,
+                modifier = Modifier.padding(Dimens.SpaceLarge),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
     }

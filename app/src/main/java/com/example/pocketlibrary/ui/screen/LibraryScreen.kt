@@ -1,4 +1,4 @@
-package com.example.pocketlibrary.ui.theme
+package com.example.pocketlibrary.ui.screen
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -28,13 +28,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
+import com.example.pocketlibrary.ui.theme.Dimens
 
-data class Book(
-    val title: Int,
-    val author: Int,
-    val imageRes: Int,
-)
 
 @Composable
 fun LibraryScreen(){
@@ -43,39 +38,35 @@ fun LibraryScreen(){
         Book(
             title = R.string.book_title,
             author = R.string.author_name,
+            language = R.string.book_en_language,
+            pageNumber = R.string.book_page_number,
+            bookDescription = R.string.book_description_example,
+            bookNotes = R.string.book_notes_example,
             imageRes = R.drawable.book_caver_example,
-        ),
+            tags = listOf(R.string.tag_romantic,
+                R.string.tag_scary,
+                R.string.tag_idea,
+                R.string.tag_dog,
+                R.string.tag_funny,
+                R.string.tag_life,
+                R.string.tag_poem),
+            ),
         Book(
             title = R.string.book_long_title,
             author = R.string.author_name,
+            language = R.string.book_en_language,
+            pageNumber = R.string.book_page_number,
+            bookDescription = R.string.book_description_example,
+            bookNotes = R.string.book_notes_example,
             imageRes = R.drawable.book_caver_example,
-        ),
-        Book(
-            title = R.string.book_title,
-            author = R.string.author_name,
-            imageRes = R.drawable.book_caver_example,
-        ),
-        Book(
-            title = R.string.book_title,
-            author = R.string.author_name,
-            imageRes = R.drawable.book_caver_example,
-        ),Book(
-            title = R.string.book_title,
-            author = R.string.author_name,
-            imageRes = R.drawable.book_caver_example,
-        ),Book(
-            title = R.string.book_title,
-            author = R.string.author_name,
-            imageRes = R.drawable.book_caver_example,
-        ),Book(
-            title = R.string.book_title,
-            author = R.string.author_name,
-            imageRes = R.drawable.book_caver_example,
-        ),Book(
-            title = R.string.book_title,
-            author = R.string.author_name,
-            imageRes = R.drawable.book_caver_example,
-        ),
+            tags = listOf(R.string.tag_romantic,
+                R.string.tag_scary,
+                R.string.tag_idea,
+                R.string.tag_dog,
+                R.string.tag_funny,
+                R.string.tag_life,
+                R.string.tag_poem),
+            )
     )
 
     LazyVerticalGrid(
@@ -83,10 +74,10 @@ fun LibraryScreen(){
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surfaceVariant)
-            .padding(16.dp),
-        contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        horizontalArrangement = Arrangement.spacedBy(16.dp)
+            .padding(Dimens.SpaceMedium),
+        contentPadding = PaddingValues(Dimens.SpaceMedium),
+        verticalArrangement = Arrangement.spacedBy(Dimens.SpaceMedium),
+        horizontalArrangement = Arrangement.spacedBy(Dimens.SpaceMedium)
     ){
         items ( books ) { book ->
             BookCard(book)
@@ -101,13 +92,13 @@ fun BookCard(book: Book) {
         modifier = Modifier
             .fillMaxWidth()
             .clickable() { },
-        elevation = CardDefaults.cardElevation(4.dp),
-        shape = RoundedCornerShape(12.dp),
+        elevation = CardDefaults.cardElevation(Dimens.SpaceXXSmall),
+        shape = RoundedCornerShape(Dimens.CornerLarge),
     ) {
 
         Column (
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(8.dp)
+            modifier = Modifier.padding(Dimens.SpaceXSmall)
         ) {
 
             Image(
@@ -115,12 +106,12 @@ fun BookCard(book: Book) {
                 contentDescription = stringResource(book.title),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(150.dp)
-                    .clip(RoundedCornerShape(8.dp)),
+                    .height(Dimens.BookCoverHeightLibrary)
+                    .clip(RoundedCornerShape(Dimens.CornerSmall)),
                 contentScale = ContentScale.Crop
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(Dimens.SpaceXSmall))
 
             Text(
                 text = stringResource(book.title),

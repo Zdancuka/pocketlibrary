@@ -1,7 +1,6 @@
 package com.example.pocketlibrary.ui.screen
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,7 +15,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -30,38 +28,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.example.pocketlibrary.R
-
-data class Book(
-    val title: Int,
-    val author: Int,
-    val language: Int,
-    val pageNumber: Int,
-    val bookDescription: Int,
-    val bookNotes: Int,
-    val imageRes: Int,
-    val tags: List<Int>,
-)
-
-val book = Book(
-    title = R.string.book_title,
-    author = R.string.author_name,
-    language = R.string.book_en_language,
-    pageNumber = R.string.book_page_number,
-    bookDescription = R.string.book_description_example,
-    bookNotes = R.string.book_notes_example,
-    imageRes = R.drawable.book_caver_example,
-    tags = listOf(
-        R.string.tag_romantic,
-        R.string.tag_scary,
-        R.string.tag_idea,
-        R.string.tag_dog,
-        R.string.tag_funny,
-        R.string.tag_life,
-        R.string.tag_poem
-    )
-)
+import com.example.pocketlibrary.ui.theme.Dimens
 
 @Composable
 fun BookDetailsScreen(book: Book)
@@ -76,7 +46,7 @@ fun BookDetailsScreen(book: Book)
             contentDescription = null,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(250.dp),
+                .height(Dimens.DetailsHeaderImageHeight),
             contentScale = ContentScale.Crop,
             alpha = 0.25f
         )
@@ -85,14 +55,14 @@ fun BookDetailsScreen(book: Book)
         Column (
             modifier = Modifier
                 .fillMaxSize()
-                .padding(20.dp,0.dp)
+                .padding(horizontal = Dimens.SpaceLarge)
                 .verticalScroll(rememberScrollState())
         ) {
 
             Row (
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(20.dp),
+                    .padding(Dimens.SpaceLarge),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
 
@@ -124,19 +94,21 @@ fun BookDetailsScreen(book: Book)
                     Icon(
                         painter = painterResource(R.drawable.ic_language),
                         null,
-                        //tint = Color.Unspecified,
+                        tint = MaterialTheme.colorScheme.onSurface
                         )
-                    Text(stringResource(book.language))
+                    Text(
+                        text = stringResource(book.language),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
                 }
 
                 Image(
                     painter = painterResource(book.imageRes),
                     contentDescription = null,
                     modifier = Modifier
-                        //.align(Alignment.CenterHorizontally)
-                        .width(140.dp)
-                        .height(210.dp)
-                        .clip(RoundedCornerShape(8.dp)),
+                        .width(Dimens.BookCoverWidthMedium)
+                        .height(Dimens.BookCoverHeightMedium)
+                        .clip(RoundedCornerShape(Dimens.CornerSmall)),
                     contentScale = ContentScale.Crop
                 )
 
@@ -144,91 +116,102 @@ fun BookDetailsScreen(book: Book)
                     Icon(
                         painter = painterResource(R.drawable.ic_document),
                         null,
-                        //tint = Color.Unspecified,
+                        tint = MaterialTheme.colorScheme.onSurface
                         )
-                    Text(stringResource(book.pageNumber))
+                    Text(
+                        text = stringResource(book.pageNumber),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
                 }
             }
 
-            Spacer(Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(Dimens.SpaceMedium))
 
             Text(
                 text = stringResource(book.title),
                 style = MaterialTheme.typography.headlineSmall,
+                color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.align(Alignment.CenterHorizontally)
                 )
 
             Text(
                 text = stringResource(book.author),
                 modifier = Modifier.align(Alignment.CenterHorizontally),
-                color = Color.Gray,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 style = MaterialTheme.typography.bodyMedium
                 )
 
-            Spacer(Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(Dimens.SpaceXLarge))
 
 
                 Text(
                     stringResource(R.string.book_details_tags_title),
                     style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
 
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(Dimens.SpaceXSmall))
 
                 FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(Dimens.SpaceXSmall),
+                    verticalArrangement = Arrangement.spacedBy(Dimens.SpaceXSmall)
                 ) {
 
                     book.tags.forEach { tag ->
 
                         Surface(
-                            shape = RoundedCornerShape(6.dp),
-                            color = Color(0xFFF3F4F6),
+                            shape = RoundedCornerShape(Dimens.CornerSmall),
+                            color = MaterialTheme.colorScheme.surface,
                             shadowElevation = 0.dp
                         ) {
                             Text(
-                                text = stringResource(tag),
+                                text = "#" + stringResource(tag),
                                 modifier = Modifier.padding(
-                                    horizontal = 10.dp,
-                                    vertical = 4.dp
+                                    horizontal = Dimens.SpaceSmall,
+                                    vertical = Dimens.SpaceXXSmall
                                 ),
-                                color = Color.Gray,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer,
                                 style = MaterialTheme.typography.bodyMedium
                             )
                         }
                     }
                 }
 
-                Spacer(Modifier.height(24.dp))
+                Spacer(Modifier.height(Dimens.SpaceXXSmall))
+
+                Text(
+                    text = stringResource(R.string.show_more),
+                    modifier = Modifier.align(Alignment.End),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textDecoration = TextDecoration.Underline,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+
+                Spacer(modifier = Modifier.height(Dimens.SpaceXSmall))
 
                 Text(
                     text = stringResource(R.string.book_details_description_title),
                     style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
 
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Text(
-                    text = stringResource(book.bookDescription),
-                    style = MaterialTheme.typography.bodyMedium,
-                )
-
-                Spacer(Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(Dimens.SpaceLarge))
 
                 Text(
                     text = stringResource(R.string.book_details_notes_title),
-                    style = MaterialTheme.typography.titleMedium,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(Dimens.SpaceXSmall))
 
                 Text(
                     text = stringResource(book.bookNotes),
                     style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
 
-                Spacer(Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(Dimens.SpaceXLarge))
         }
     }
 }

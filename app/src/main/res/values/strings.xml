@@ -26,13 +26,17 @@
         in the community. For the most part, the characters acted
         logically.</string>
 
-    <string name="tag_romantic">#Romantic</string>
-    <string name="tag_scary">#Scary</string>
-    <string name="tag_idea">#Idea for lunch</string>
-    <string name="tag_dog">#Dog</string>
-    <string name="tag_funny">#Funny act</string>
-    <string name="tag_life">#Life lesson</string>
-    <string name="tag_poem">#Poem</string>
+    <string name="tag_romantic">Romantic</string>
+    <string name="tag_scary">Scary</string>
+    <string name="tag_idea">Idea for lunch</string>
+    <string name="tag_dog">Dog</string>
+    <string name="tag_funny">Funny act</string>
+    <string name="tag_life">Life lesson</string>
+    <string name="tag_poem">Poem</string>
+    <string name="tag_bestseller">Bestseller</string>
+    <string name="tag_classic">Classic</string>
+    <string name="tag_intriguing">Intriguing</string>
+    <string name="tag_tag">Tag</string>
 
     <string name="save">Save</string>
     <string name="add_a_book">Add a book</string>
@@ -51,5 +55,14 @@
     <string name="enter_the_language">Enter the language</string>
     <string name="enter_the_description">Enter the description</string>
     <string name="enter_the_notes">Enter the notes</string>
+    <string name="enter_the_text">Enter your text here</string>
+
+    <string name="tags">Tags</string>
+    <string name="tag_search_history">Tag search history</string>
+    <string name="romantic">Romantic</string>
+    <string name="books_with_tag_romantic">Books with a tag “Romantic”</string>
+
+    <string name="tag_lunch">Idea for lunch</string>
+    <string name="more">…more</string>
 
 </resources>
