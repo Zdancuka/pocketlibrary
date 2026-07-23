@@ -31,18 +31,22 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.example.pocketlibrary.R
+import com.example.pocketlibrary.data.local.entity.BookWithTags
 import com.example.pocketlibrary.ui.theme.Dimens
 
 @Composable
-fun BookDetailsScreen(book: Book)
+fun BookDetailsScreen(bookWithTags: BookWithTags)
 {
+    val book = bookWithTags.book
+    val tags = bookWithTags.tags
+
     Box(
         modifier = Modifier
             .fillMaxSize()
     ) {
 
         Image(
-            painter = painterResource(book.imageRes),
+            painter = painterResource(R.drawable.book_caver_example), //ToDo
             contentDescription = null,
             modifier = Modifier
                 .fillMaxWidth()
@@ -97,13 +101,13 @@ fun BookDetailsScreen(book: Book)
                         tint = MaterialTheme.colorScheme.onSurface
                         )
                     Text(
-                        text = stringResource(book.language),
+                        text = book.language ?: "",
                         color = MaterialTheme.colorScheme.onSurface
                     )
                 }
 
                 Image(
-                    painter = painterResource(book.imageRes),
+                    painter = painterResource(R.drawable.book_caver_example),
                     contentDescription = null,
                     modifier = Modifier
                         .width(Dimens.BookCoverWidthMedium)
@@ -119,7 +123,7 @@ fun BookDetailsScreen(book: Book)
                         tint = MaterialTheme.colorScheme.onSurface
                         )
                     Text(
-                        text = stringResource(book.pageNumber),
+                        text = book.pageNumber?.toString() ?: "",
                         color = MaterialTheme.colorScheme.onSurface
                     )
                 }
@@ -128,14 +132,14 @@ fun BookDetailsScreen(book: Book)
             Spacer(modifier = Modifier.height(Dimens.SpaceMedium))
 
             Text(
-                text = stringResource(book.title),
+                text = book.title,
                 style = MaterialTheme.typography.headlineSmall,
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.align(Alignment.CenterHorizontally)
                 )
 
             Text(
-                text = stringResource(book.author),
+                text = book.author,
                 modifier = Modifier.align(Alignment.CenterHorizontally),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 style = MaterialTheme.typography.bodyMedium
@@ -157,7 +161,7 @@ fun BookDetailsScreen(book: Book)
                     verticalArrangement = Arrangement.spacedBy(Dimens.SpaceXSmall)
                 ) {
 
-                    book.tags.forEach { tag ->
+                    tags.forEach { tag ->
 
                         Surface(
                             shape = RoundedCornerShape(Dimens.CornerSmall),
@@ -165,7 +169,7 @@ fun BookDetailsScreen(book: Book)
                             shadowElevation = 0.dp
                         ) {
                             Text(
-                                text = "#" + stringResource(tag),
+                                text = "#${tag.name}",
                                 modifier = Modifier.padding(
                                     horizontal = Dimens.SpaceSmall,
                                     vertical = Dimens.SpaceXXSmall
@@ -198,6 +202,14 @@ fun BookDetailsScreen(book: Book)
                 Spacer(modifier = Modifier.height(Dimens.SpaceLarge))
 
                 Text(
+                text = book.bookDescription ?: "",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface
+                )
+
+                Spacer(modifier = Modifier.height(Dimens.SpaceLarge))
+
+                Text(
                     text = stringResource(R.string.book_details_notes_title),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface
@@ -206,7 +218,7 @@ fun BookDetailsScreen(book: Book)
                 Spacer(modifier = Modifier.height(Dimens.SpaceXSmall))
 
                 Text(
-                    text = stringResource(book.bookNotes),
+                    text = book.bookNotes ?: "",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface
                 )

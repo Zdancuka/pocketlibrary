@@ -33,11 +33,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextDecoration
 import com.example.pocketlibrary.R
+import com.example.pocketlibrary.data.local.entity.BookWithTags
 import com.example.pocketlibrary.ui.theme.Dimens
 import com.example.pocketlibrary.ui.theme.LightGray
 
 @Composable
-fun TagScreen(book: Book) {
+fun TagScreen(bookWithTags: BookWithTags) {
 
     Column (
         modifier = Modifier
@@ -74,18 +75,8 @@ fun TagScreen(book: Book) {
             verticalArrangement = Arrangement.spacedBy(Dimens.SpaceSmall)
         ) {
 
-            listOf(
-                R.string.tag_bestseller,
-                R.string.tag_classic,
-                R.string.tag_intriguing,
-                R.string.tag_tag,
-                R.string.tag_tag,
-                R.string.tag_classic,
-                R.string.tag_bestseller
-            ).forEach {
-
-                OutlinedTag(it)
-
+            bookWithTags.tags.forEach { tag ->
+                OutlinedTag(tag.name)
             }
 
             Text(
@@ -100,14 +91,14 @@ fun TagScreen(book: Book) {
         Spacer(modifier = Modifier.height(Dimens.SpaceXXLarge))
 
         Text(
-            text = stringResource(R.string.books_with_tag_romantic),
+            text = stringResource(R.string.books_with_tag_romantic), //Todo
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onSurface
         )
 
         Spacer(modifier = Modifier.height(Dimens.SpaceMedium))
 
-        BookTagCard(book)
+        BookTagCard(bookWithTags)
 
         Spacer(modifier = Modifier.height(Dimens.SpaceXLarge))
     }
@@ -139,7 +130,7 @@ private fun TagSearchBar() {
 
             Spacer(modifier = Modifier.width(Dimens.SpaceMedium))
 
-            //TextField
+            //Todo TextField
             Text(
                 text = stringResource(R.string.tag_romantic),
                 style = MaterialTheme.typography.bodyLarge,
@@ -158,7 +149,7 @@ private fun TagSearchBar() {
 }
 
 @Composable
-private fun OutlinedTag(text: Int) {
+private fun OutlinedTag(text: String) {
 
     Surface(
         shape = RoundedCornerShape(Dimens.CornerPill),
@@ -167,7 +158,7 @@ private fun OutlinedTag(text: Int) {
     ) {
 
         Text(
-            text = stringResource(text),
+            text = "#$text",
             modifier = Modifier.padding(horizontal = Dimens.SpaceSmall, vertical = Dimens.SpaceXSmall),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -176,19 +167,23 @@ private fun OutlinedTag(text: Int) {
 }
 
 @Composable
-private fun BookTagCard(book: Book) {  //is only used inside TagScreen.kt, so it should be private.
+private fun BookTagCard(bookWithTags: BookWithTags) {
+
+    val book = bookWithTags.book
+    val tags = bookWithTags.tags
+    val MAX_TAGS_TO_SHOW = 3
 
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(Dimens.CornerXLarge),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = Dimens.CornerSmall) //corner radius dimension being reused for elevation. Confusing, and not recommended. Should create a new dimension for elevation
+        elevation = CardDefaults.cardElevation(defaultElevation = Dimens.SpaceMedium)
     ) {
 
         Row(modifier = Modifier.padding(Dimens.SpaceSmall)) {
 
             Image(
-                painter = painterResource(book.imageRes),
+                painter = painterResource(R.drawable.book_caver_example),
                 contentDescription = null,
                 modifier = Modifier
                     .width(Dimens.BookCoverWidthSmall)
@@ -201,7 +196,7 @@ private fun BookTagCard(book: Book) {  //is only used inside TagScreen.kt, so it
             Column(modifier = Modifier.fillMaxWidth()) {
 
                 Text(
-                    text = stringResource(book.title),
+                    text = book.title,
                     style = MaterialTheme.typography.headlineSmall,
                     color = MaterialTheme.colorScheme.onSurface
                 )
@@ -209,7 +204,7 @@ private fun BookTagCard(book: Book) {  //is only used inside TagScreen.kt, so it
                 Spacer(modifier = Modifier.height(Dimens.SpaceXXSmall))
 
                 Text(
-                    text = stringResource(book.author),
+                    text = book.author,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -221,11 +216,11 @@ private fun BookTagCard(book: Book) {  //is only used inside TagScreen.kt, so it
                     verticalArrangement = Arrangement.spacedBy(Dimens.SpaceXSmall)
                 ) {
                     //The number 3 appears twice independently. If someone changes one, the other won't match. Extract it to const something like MAX_TAGS_TO_SHOW = 3 and use it in both places. This will make it easier to change in the future.
-                    book.tags.take(3).forEach {
-                        OutlinedTag(it)
+                    tags.take(MAX_TAGS_TO_SHOW).forEach { tag->
+                        OutlinedTag(tag.name)
                     }
 
-                    if (book.tags.size > 3) {
+                    if (tags.size > MAX_TAGS_TO_SHOW) {
                         Text(
                             text = stringResource(R.string.more),
                             style = MaterialTheme.typography.bodyMedium,
