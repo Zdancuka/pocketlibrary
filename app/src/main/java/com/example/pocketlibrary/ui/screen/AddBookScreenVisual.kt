@@ -42,10 +42,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import com.example.pocketlibrary.data.local.entity.BookEntity
 import androidx.compose.runtime.mutableStateOf
 import com.example.pocketlibrary.ui.viewmodel.BookViewModel
 
+// This screen got pretty big, so splitting chunks like header/tags section makes it way easier to read and reuse.
 @Composable
 fun AddBookScreenVisual(
     bookViewModel: BookViewModel,
@@ -78,43 +80,7 @@ fun AddBookScreenVisual(
             .verticalScroll(rememberScrollState())
             .padding(horizontal = Dimens.SpaceLarge, vertical = Dimens.SpaceLarge)
     ) {
-
-        Text(
-            text = stringResource(R.string.save),
-            modifier = Modifier.align(Alignment.CenterHorizontally),
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onSurface
-        )
-
-        Spacer(modifier = Modifier.height(Dimens.SpaceXLarge))
-
-        Text(
-            text = stringResource(R.string.add_a_book),
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onSurface
-        )
-
-        Spacer(modifier = Modifier.height(Dimens.SpaceXXLarge))
-
-        Box(
-            modifier = Modifier
-                .align(Alignment.CenterHorizontally)
-                .width(Dimens.ImagePlaceholderWidth)
-                .height(Dimens.ImagePlaceholderHeight)
-                .clip(RoundedCornerShape(Dimens.CornerLarge))
-                .background(MaterialTheme.colorScheme.background)
-                .border(Dimens.BorderThin, MaterialTheme.colorScheme.surface, RoundedCornerShape(Dimens.CornerLarge)),
-            contentAlignment = Alignment.Center
-        ) {
-
-            Image(
-                painter = painterResource(R.drawable.ic_image_placeholder),
-                contentDescription = null,
-            )
-
-        }
-
-        Spacer(modifier = Modifier.height(Dimens.SpaceMedium))
+        AddBookHeader()
 
         LabeledField(
             label = stringResource(R.string.title),
@@ -282,6 +248,54 @@ fun AddBookScreenVisual(
 
         Spacer(modifier = Modifier.height(Dimens.SpaceMedium))
     }
+}
+
+@Composable
+private fun AddBookHeader() {
+    Text(
+        text = stringResource(R.string.save),
+        modifier = Modifier.fillMaxWidth(),
+        textAlign = TextAlign.Center,
+        fontWeight = FontWeight.Bold,
+        color = MaterialTheme.colorScheme.onSurface
+    )
+
+    Spacer(modifier = Modifier.height(Dimens.SpaceXLarge))
+
+    Text(
+        text = stringResource(R.string.add_a_book),
+        fontWeight = FontWeight.Bold,
+        color = MaterialTheme.colorScheme.onSurface
+    )
+
+    Spacer(modifier = Modifier.height(Dimens.SpaceXXLarge))
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth(),
+        contentAlignment = Alignment.Center
+    ) {
+        Box(
+            modifier = Modifier
+                .width(Dimens.ImagePlaceholderWidth)
+                .height(Dimens.ImagePlaceholderHeight)
+                .clip(RoundedCornerShape(Dimens.CornerLarge))
+                .background(MaterialTheme.colorScheme.background)
+                .border(
+                    Dimens.BorderThin,
+                    MaterialTheme.colorScheme.surface,
+                    RoundedCornerShape(Dimens.CornerLarge)
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Image(
+                painter = painterResource(R.drawable.ic_image_placeholder),
+                contentDescription = null,
+            )
+        }
+    }
+
+    Spacer(modifier = Modifier.height(Dimens.SpaceMedium))
 }
 
 

@@ -20,6 +20,7 @@ class BookViewModel (
         .observeBooksWithTags()
         .stateIn(
             scope = viewModelScope,
+            // Magic number, better move timeout to a named const.
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = emptyList()
         )

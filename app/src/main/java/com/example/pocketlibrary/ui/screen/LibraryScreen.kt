@@ -33,12 +33,14 @@ import com.example.pocketlibrary.ui.viewmodel.BookViewModel
 import androidx.compose.runtime.getValue
 import com.example.pocketlibrary.R
 
+//If it is const need to be declared here like this.
+private const val COLUMN_NUMBER = 2
+
 @Composable
 fun LibraryScreen(
     bookViewModel: BookViewModel,
     onBookClick: (BookWithTags) -> Unit = { }
 ){
-    val COLUMN_NUMBER = 2
 
     val books by bookViewModel.books.collectAsState()
 
@@ -72,7 +74,8 @@ fun BookCard(
     Card (
         modifier = Modifier
             .fillMaxWidth()
-            .clickable() { },
+            // It wasn't opening details because the tap never called the callback from LibraryScreen.
+            .clickable { onClick(bookWithTags) },
         elevation = CardDefaults.cardElevation(Dimens.SpaceXXSmall),
         shape = RoundedCornerShape(Dimens.CornerLarge),
     ) {

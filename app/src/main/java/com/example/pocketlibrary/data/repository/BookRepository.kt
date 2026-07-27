@@ -29,6 +29,8 @@ class BookRepository(
                     existing.tagId
                 } else {
                     val newId = database.tagDao().insert(TagEntity(name = tagName))
+                    // `!!` can crash app; safer next step is handling null explicitly and returning a clear failure.
+                    // Try to avoid !! usage where it is possible
                     if (newId != -1L) newId else database.tagDao().findByName(tagName)!!.tagId
                 }
             }

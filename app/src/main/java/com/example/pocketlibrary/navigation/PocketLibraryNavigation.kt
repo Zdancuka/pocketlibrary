@@ -82,11 +82,13 @@ fun PocketLibraryNavigation() {
                 arguments = listOf(navArgument("bookId"){
                     type = NavType.LongType })
                 ) { backStackEntry ->
+                // Magic number fallback, better move to a named const for readability.
                 val bookId = backStackEntry.arguments?.getLong("bookId") ?: 0L
                 val bookWithTags by bookViewModel.bookFlow(bookId).collectAsState(initial = null)
 
-                bookWithTags?.let { detalis ->
-                    BookDetailsScreen(bookWithTags = detalis)
+                bookWithTags?.let { details ->
+                    // Typo was `detalis`.
+                    BookDetailsScreen(bookWithTags = details)
                 }
             }
         }

@@ -46,6 +46,7 @@ fun BookDetailsScreen(bookWithTags: BookWithTags)
     ) {
 
         Image(
+            // Typo in drawable name (`caver`) - keeping as-is until resource is renamed.
             painter = painterResource(R.drawable.book_caver_example), //ToDo
             contentDescription = null,
             modifier = Modifier
