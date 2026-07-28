@@ -20,57 +20,32 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import com.example.pocketlibrary.R
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import com.example.pocketlibrary.data.local.entity.BookWithTags
 import com.example.pocketlibrary.ui.theme.Dimens
+import com.example.pocketlibrary.ui.viewmodel.BookViewModel
+import androidx.compose.runtime.getValue
+import com.example.pocketlibrary.R
 
+//If it is const need to be declared here like this.
+private const val COLUMN_NUMBER = 2
 
 @Composable
-fun LibraryScreen(){
+fun LibraryScreen(
+    bookViewModel: BookViewModel,
+    onBookClick: (BookWithTags) -> Unit = { }
+){
 
-    val books: List<Book> = listOf(
-        Book(
-            title = R.string.book_title,
-            author = R.string.author_name,
-            language = R.string.book_en_language,
-            pageNumber = R.string.book_page_number,
-            bookDescription = R.string.book_description_example,
-            bookNotes = R.string.book_notes_example,
-            imageRes = R.drawable.book_caver_example,
-            tags = listOf(R.string.tag_romantic,
-                R.string.tag_scary,
-                R.string.tag_idea,
-                R.string.tag_dog,
-                R.string.tag_funny,
-                R.string.tag_life,
-                R.string.tag_poem),
-            ),
-        Book(
-            title = R.string.book_long_title,
-            author = R.string.author_name,
-            language = R.string.book_en_language,
-            pageNumber = R.string.book_page_number,
-            bookDescription = R.string.book_description_example,
-            bookNotes = R.string.book_notes_example,
-            imageRes = R.drawable.book_caver_example,
-            tags = listOf(R.string.tag_romantic,
-                R.string.tag_scary,
-                R.string.tag_idea,
-                R.string.tag_dog,
-                R.string.tag_funny,
-                R.string.tag_life,
-                R.string.tag_poem),
-            )
-    )
+    val books by bookViewModel.books.collectAsState()
 
     LazyVerticalGrid(
-        columns = GridCells.Fixed(2),
+        columns = GridCells.Fixed(COLUMN_NUMBER),
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surfaceVariant)
@@ -79,19 +54,28 @@ fun LibraryScreen(){
         verticalArrangement = Arrangement.spacedBy(Dimens.SpaceMedium),
         horizontalArrangement = Arrangement.spacedBy(Dimens.SpaceMedium)
     ){
-        items ( books ) { book ->
-            BookCard(book)
+        items (books) {bookWithTags ->
+            BookCard(
+                bookWithTags = bookWithTags,
+                onClick = { onBookClick(bookWithTags) }
+            )
         }
     }
 }
 
 @Composable
-fun BookCard(book: Book) {
+fun BookCard(
+    bookWithTags: BookWithTags,
+    onClick: (BookWithTags) -> Unit = {}
+) {
+
+    val book = bookWithTags.book
 
     Card (
         modifier = Modifier
             .fillMaxWidth()
-            .clickable() { },
+            // It wasn't opening details because the tap never called the callback from LibraryScreen.
+            .clickable { onClick(bookWithTags) },
         elevation = CardDefaults.cardElevation(Dimens.SpaceXXSmall),
         shape = RoundedCornerShape(Dimens.CornerLarge),
     ) {
@@ -102,8 +86,8 @@ fun BookCard(book: Book) {
         ) {
 
             Image(
-                painter = painterResource(book.imageRes),
-                contentDescription = stringResource(book.title),
+                painter = painterResource(R.drawable.book_caver_example),
+                contentDescription = book.title,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(Dimens.BookCoverHeightLibrary)
@@ -114,13 +98,13 @@ fun BookCard(book: Book) {
             Spacer(modifier = Modifier.height(Dimens.SpaceXSmall))
 
             Text(
-                text = stringResource(book.title),
+                text = book.title,
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.bodyMedium
             )
 
             Text(
-                text = "by ${stringResource(book.author)}",
+                text = "by ${book.author}",
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
