@@ -34,6 +34,16 @@ class BookViewModel (
         }
     }
 
+    fun deleteBook(bookId: Long){
+        viewModelScope.launch {
+            try{
+                repository.deleteBookAndReference(bookId)
+            } catch ( e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
     class Factory(private val repository: BookRepository): ViewModelProvider.Factory{
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             @Suppress ("UNCHECKED_CAST")

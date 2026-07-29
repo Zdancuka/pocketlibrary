@@ -1,6 +1,7 @@
 package com.example.pocketlibrary.data.repository
 
 import androidx.room.withTransaction
+import com.example.pocketlibrary.data.local.dao.BookDao
 import com.example.pocketlibrary.data.local.database.PocketLibraryDatabase
 import com.example.pocketlibrary.data.local.entity.BookEntity
 import com.example.pocketlibrary.data.local.entity.BookTagCrossRef
@@ -11,6 +12,10 @@ class BookRepository(
 ) {
     fun observeBookWithTags(bookId: Long)= database.bookDao().observeBookWithTags(bookId)
     fun observeBooksWithTags()= database.bookDao().observeBooksWithTags()
+
+    suspend fun deleteBookAndReference(bookId: Long){
+        database.bookDao().deleteBookAndRef(bookId)
+    }
 
     suspend fun addBookWithTags(
         book: BookEntity,

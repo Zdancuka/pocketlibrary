@@ -21,4 +21,19 @@ interface BookDao {
     @Transaction
     @Query("SELECT * FROM books WHERE bookId = :bookId LIMIT 1")
     fun observeBookWithTags(bookId:Long): Flow<BookWithTags?>
+
+    //Delete Book and it References
+    @Query("DELETE FROM book_tag_cross_ref WHERE bookId = :bookId")
+    suspend fun deleteBookTagRef(bookId: Long): Int
+
+    // Delete the book itself
+    @Query("DELETE FROM books WHERE bookId = :bookId")
+    suspend fun deleteByBookId(bookId: Long): Int
+
+    // Delete both in one transaction
+    @Transaction
+    suspend fun deleteBookAndRef(bookId: Long) {
+        deleteBookTagRef(bookId)
+        deleteByBookId(bookId)
+    }
 }

@@ -9,7 +9,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.pocketlibrary.navigation.PocketLibraryNavigation
-import com.example.pocketlibrary.ui.screen.AddBookScreenVisual
 import com.example.pocketlibrary.ui.theme.PocketLibraryTheme
 
 class MainActivity : ComponentActivity() {
