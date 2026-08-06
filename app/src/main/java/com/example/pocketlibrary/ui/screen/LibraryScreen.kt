@@ -92,7 +92,6 @@ fun BookCard(
     Card (
         modifier = Modifier
             .fillMaxWidth()
-            // It wasn't opening details because the tap never called the callback from LibraryScreen.
             .clickable { onClick(bookWithTags) },
         elevation = CardDefaults.cardElevation(Dimens.SpaceXXSmall),
         shape = RoundedCornerShape(Dimens.CornerLarge),
