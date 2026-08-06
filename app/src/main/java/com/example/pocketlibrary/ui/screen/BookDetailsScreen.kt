@@ -18,24 +18,26 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 import com.example.pocketlibrary.R
 import com.example.pocketlibrary.data.local.entity.BookWithTags
 import com.example.pocketlibrary.ui.theme.Dimens
+import com.example.pocketlibrary.ui.viewmodel.BookViewModel
 
 @Composable
-fun BookDetailsScreen(bookWithTags: BookWithTags)
+fun BookDetailsScreen(
+    bookViewModel: BookViewModel,
+    bookWithTags: BookWithTags,
+    navController: NavHostController)
 {
     val book = bookWithTags.book
     val tags = bookWithTags.tags
@@ -71,19 +73,25 @@ fun BookDetailsScreen(bookWithTags: BookWithTags)
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
 
-                IconButton(onClick = { }) {
+                IconButton(
+                    onClick = { navController.popBackStack()
+                    }
+                ) {
                     Icon(
                         painter = painterResource(R.drawable.ic_arrow_back),
-                        contentDescription = null,
-                        tint = Color.Unspecified
+                        contentDescription = "Back",
+                        tint = MaterialTheme.colorScheme.onSurface
                     )
                 }
 
-                IconButton(onClick = { }) {
+                IconButton(onClick = {
+                    bookViewModel.deleteBook(bookWithTags.book.bookId)
+                    navController.popBackStack()
+                }) {
                     Icon(
                         painter = painterResource(R.drawable.ic_delete),
                         contentDescription = null,
-                        tint = Color.Unspecified
+                        tint = MaterialTheme.colorScheme.onSurface
                     )
                 }
             }
@@ -157,40 +165,26 @@ fun BookDetailsScreen(bookWithTags: BookWithTags)
 
                 Spacer(Modifier.height(Dimens.SpaceXSmall))
 
-                FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(Dimens.SpaceXSmall),
-                    verticalArrangement = Arrangement.spacedBy(Dimens.SpaceXSmall)
-                ) {
 
-                    tags.forEach { tag ->
+            FlowRow (
+                horizontalArrangement = Arrangement.spacedBy(Dimens.SpaceXSmall),
+                verticalArrangement = Arrangement.spacedBy(Dimens.SpaceSmall)
+            ) {
 
-                        Surface(
-                            shape = RoundedCornerShape(Dimens.CornerSmall),
-                            color = MaterialTheme.colorScheme.surface,
-                            shadowElevation = 0.dp
-                        ) {
-                            Text(
-                                text = "#${tag.name}",
-                                modifier = Modifier.padding(
-                                    horizontal = Dimens.SpaceSmall,
-                                    vertical = Dimens.SpaceXXSmall
-                                ),
-                                color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-                        }
-                    }
+                tags.forEach { tag ->
+                    OutlinedTag(tag.name)
                 }
-
-                Spacer(Modifier.height(Dimens.SpaceXXSmall))
 
                 Text(
                     text = stringResource(R.string.show_more),
-                    modifier = Modifier.align(Alignment.End),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textDecoration = TextDecoration.Underline,
-                    style = MaterialTheme.typography.bodyMedium
+                    modifier = Modifier.padding(top = Dimens.SpaceXSmall),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    textDecoration = TextDecoration.Underline
                 )
+            }
+
+
 
                 Spacer(modifier = Modifier.height(Dimens.SpaceXSmall))
 
@@ -200,19 +194,19 @@ fun BookDetailsScreen(bookWithTags: BookWithTags)
                     color = MaterialTheme.colorScheme.onSurface
                 )
 
-                Spacer(modifier = Modifier.height(Dimens.SpaceLarge))
+                Spacer(modifier = Modifier.height(Dimens.SpaceXSmall))
 
                 Text(
-                text = book.bookDescription ?: "",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface
+                    text = book.bookDescription ?: "",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
 
                 Spacer(modifier = Modifier.height(Dimens.SpaceLarge))
 
                 Text(
                     text = stringResource(R.string.book_details_notes_title),
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface
                 )
 

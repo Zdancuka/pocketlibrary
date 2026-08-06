@@ -1,10 +1,13 @@
 <resources>
     <string name="app_name">Pocket Library</string>
+
     <string name="book_details_tags_title">My Tags</string>
     <string name="book_details_description_title">Description</string>
     <string name="book_details_notes_title">Notes</string>
+
     <string name="show_more">Show more</string>
     <string name="show_less">Show less</string>
+
     <string name="book_title">Book Title</string>
     <string name="book_long_title">Book Long Title Example</string>
     <string name="author_name">Author Name</string>
@@ -26,16 +29,6 @@
         in the community. For the most part, the characters acted
         logically.</string>
 
-    <string name="tag_romantic">Romantic</string>
-    <string name="tag_scary">Scary</string>
-    <string name="tag_idea">Idea for lunch</string>
-    <string name="tag_dog">Dog</string>
-    <string name="tag_funny">Funny act</string>
-    <string name="tag_life">Life lesson</string>
-    <string name="tag_poem">Poem</string>
-    <string name="tag_bestseller">Bestseller</string>
-    <string name="tag_classic">Classic</string>
-    <string name="tag_intriguing">Intriguing</string>
     <string name="tag_tag">Tag</string>
 
     <string name="save">Save</string>
@@ -49,18 +42,19 @@
     <string name="notes">Notes</string>
     <string name="add_tags">Add tags +</string>
 
-    <string name="the_star">The Star</string>
-    <string name="enter_the_author">Enter the author</string>
-    <string name="enter_the_page_number">Enter the page number</string>
-    <string name="enter_the_language">Enter the language</string>
-    <string name="enter_the_description">Enter the description</string>
-    <string name="enter_the_notes">Enter the notes</string>
-    <string name="enter_the_text">Enter your text here</string>
+    <string name="enter_title">Enter the title</string>
+    <string name="enter_author">Enter the author</string>
+    <string name="enter_page_number">Enter the page number</string>
+    <string name="enter_language">Enter the language</string>
+    <string name="enter_description">Enter the description</string>
+    <string name="enter_notes">Enter the notes</string>
+
+    <string name="enter_text">Enter your text here</string>
 
     <string name="tags">Tags</string>
+    <string name="search">Search…</string>
     <string name="tag_search_history">Tag search history</string>
-    <string name="romantic">Romantic</string>
-    <string name="books_with_tag_romantic">Books with a tag “Romantic”</string>
+    <string name="books_with_tag">Books with a tag </string>
 
     <string name="tag_lunch">Idea for lunch</string>
     <string name="more">…more</string>
