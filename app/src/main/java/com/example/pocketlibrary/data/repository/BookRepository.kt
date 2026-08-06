@@ -13,7 +13,7 @@ class BookRepository(
     fun observeBookWithTags(bookId: Long)= database.bookDao().observeBookWithTags(bookId)
     fun observeBooksWithTags()= database.bookDao().observeBooksWithTags()
 
-    suspend fun deleteBookAndReference(bookId: Long){
+    suspend fun deleteBook(bookId: Long){
         database.bookDao().deleteBookAndRef(bookId)
     }
 

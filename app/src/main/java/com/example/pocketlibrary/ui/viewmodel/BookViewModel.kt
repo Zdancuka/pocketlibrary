@@ -37,7 +37,7 @@ class BookViewModel (
     fun deleteBook(bookId: Long){
         viewModelScope.launch {
             try{
-                repository.deleteBookAndReference(bookId)
+                repository.deleteBook(bookId)
             } catch ( e: Exception) {
                 e.printStackTrace()
             }

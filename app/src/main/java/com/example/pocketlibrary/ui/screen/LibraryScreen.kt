@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -31,6 +32,7 @@ import com.example.pocketlibrary.data.local.entity.BookWithTags
 import com.example.pocketlibrary.ui.theme.Dimens
 import com.example.pocketlibrary.ui.viewmodel.BookViewModel
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.res.stringResource
 import com.example.pocketlibrary.R
 
 //If it is const need to be declared here like this.
@@ -60,6 +62,22 @@ fun LibraryScreen(
                 onClick = { onBookClick(bookWithTags) }
             )
         }
+
+        if (books.isEmpty()){
+            item ( span = { GridItemSpan(maxLineSpan)}){
+                Text(
+                    text = stringResource(R.string.no_books_yet),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = Dimens.SpaceXLarge),
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+
+        item { Spacer(modifier = Modifier.height(Dimens.SpaceLarge)) }
     }
 }
 

@@ -86,7 +86,7 @@ fun AddBookScreenVisual(
             label = stringResource(R.string.title),
             value = title,
             onValueChange = { title = it },
-            placeholder = stringResource(R.string.the_star)
+            placeholder = stringResource(R.string.enter_title)
         )
 
         Spacer(modifier = Modifier.height(Dimens.SpaceXLarge))
@@ -95,7 +95,7 @@ fun AddBookScreenVisual(
             label = stringResource(R.string.author),
             value = author,
             onValueChange = { author = it },
-            placeholder = stringResource(R.string.enter_the_author)
+            placeholder = stringResource(R.string.enter_author)
         )
 
         Spacer(modifier = Modifier.height(Dimens.SpaceXLarge))
@@ -106,7 +106,7 @@ fun AddBookScreenVisual(
                     label = stringResource(R.string.total_pages),
                     value = pageCountText,
                     onValueChange = { new -> if (new.all { it.isDigit() }) pageCountText = new },
-                    placeholder = stringResource(R.string.enter_the_page_number),
+                    placeholder = stringResource(R.string.enter_page_number),
                     keyboardType = KeyboardType.Number
                 )
             }
@@ -115,7 +115,7 @@ fun AddBookScreenVisual(
                     label = stringResource(R.string.language),
                     value = language,
                     onValueChange = { language = it },
-                    placeholder = stringResource(R.string.enter_the_language)
+                    placeholder = stringResource(R.string.enter_language)
                 )
             }
         }
@@ -127,7 +127,7 @@ fun AddBookScreenVisual(
             label = stringResource(R.string.description),
             value = description,
             onValueChange = { description = it },
-            placeholder = stringResource(R.string.enter_the_description)
+            placeholder = stringResource(R.string.enter_description)
         )
 
         Spacer(modifier = Modifier.height(Dimens.SpaceXLarge))
@@ -210,7 +210,7 @@ fun AddBookScreenVisual(
             label = stringResource(R.string.notes),
             value = notes,
             onValueChange = { notes = it },
-            placeholder = stringResource(R.string.enter_the_notes)
+            placeholder = stringResource(R.string.enter_notes)
         )
 
         Spacer(modifier = Modifier.height(Dimens.SpaceXXXLarge))
