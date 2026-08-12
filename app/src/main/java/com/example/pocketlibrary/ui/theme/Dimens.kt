@@ -45,4 +45,8 @@ object Dimens {
 
     //Borders
     val BorderThin = 1.dp
+
+    val BlurRadius = 5.dp
+
+    val IconEditSize = 24.dp
 }

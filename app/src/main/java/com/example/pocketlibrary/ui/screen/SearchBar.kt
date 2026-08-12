@@ -21,7 +21,7 @@ import com.example.pocketlibrary.R
 import com.example.pocketlibrary.ui.theme.Dimens
 
 @Composable
-fun TagSearchBar(
+fun SearchBar(
     query: String,
     onQueryChange: (String) -> Unit
 ) {

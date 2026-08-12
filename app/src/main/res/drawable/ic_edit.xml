@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="512dp"
+    android:height="512dp"
+    android:viewportWidth="512"
+    android:viewportHeight="512">
+
+    <!-- Document outline -->
+    <path
+        android:fillColor="@android:color/transparent"
+        android:pathData="M176,64 L64,64
+            C35,64 12,87 12,116
+            L12,448
+            C12,477 35,500 64,500
+            L424,500
+            C453,500 476,477 476,448
+            L476,336"
+        android:strokeColor="#000000"
+        android:strokeWidth="25"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+
+    <!-- Pencil outer shape -->
+    <path
+        android:fillColor="#000000"
+        android:pathData="M166,250
+            L400,16
+            C421,-5 455,-5 477,16
+            L496,35
+            C517,56 517,90 496,112
+            L262,346
+            L150,376
+            C142,378 135,371 137,363
+            L166,250 Z" />
+
+</vector>

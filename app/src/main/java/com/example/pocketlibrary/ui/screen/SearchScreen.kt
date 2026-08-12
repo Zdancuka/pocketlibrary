@@ -1,6 +1,5 @@
 package com.example.pocketlibrary.ui.screen
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -27,11 +26,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
+import coil3.compose.AsyncImage
 import com.example.pocketlibrary.R
 import com.example.pocketlibrary.data.local.entity.BookWithTags
 import com.example.pocketlibrary.ui.theme.Dimens
@@ -40,7 +40,7 @@ import com.example.pocketlibrary.ui.viewmodel.BookViewModel
 const val MAX_TAGS_TO_SHOW = 3
 
 @Composable
-fun TagScreen(
+fun SearchScreen(
     bookViewModel: BookViewModel,
     onBookClick: (BookWithTags) -> Unit = { }
 ) {
@@ -52,8 +52,17 @@ fun TagScreen(
         books
     }else {
         books.filter { bookWithTags ->
-            bookWithTags.tags.any{tag->
-                tag.name.contains(query, ignoreCase = true)
+             bookWithTags.book.title.contains (
+                    query,
+            ignoreCase = true
+            ) || bookWithTags.book.author.contains (
+                 query,
+                 ignoreCase = true
+             ) || bookWithTags.tags.any{tag->
+                tag.name.contains(
+                    query,
+                    ignoreCase = true
+                )
             }
         }
     }
@@ -80,41 +89,11 @@ fun TagScreen(
             )
         }
 
-        item { TagSearchBar(
+        item { SearchBar(
             query = query,
             onQueryChange = {query = it}
             )
         }
-
-
-//        Text(
-//            text = stringResource(R.string.tag_search_history),
-//            style = MaterialTheme.typography.titleMedium,
-//            color = MaterialTheme.colorScheme.onSurface
-//        )
-//
-//        Spacer(modifier = Modifier.height(Dimens.SpaceMedium))
-//
-//        FlowRow (
-//            horizontalArrangement = Arrangement.spacedBy(Dimens.SpaceXSmall),
-//            verticalArrangement = Arrangement.spacedBy(Dimens.SpaceSmall)
-//        ) {
-//
-//
-//            bookWithTags.tags.forEach { tag ->
-//                OutlinedTag(tag.name)
-////            }
-//        // Todo search history
-//
-//        item {
-//            Text(
-//                text = stringResource(R.string.show_more),
-//                modifier = Modifier.padding(top = Dimens.SpaceXSmall),
-//                style = MaterialTheme.typography.bodyMedium,
-//                color = MaterialTheme.colorScheme.onSurface,
-//                textDecoration = TextDecoration.Underline
-//            )
-//        }
 
         item {
             Text(
@@ -176,12 +155,13 @@ fun BookTagCard(
         )
             {
 
-            Image(
-                painter = painterResource(R.drawable.book_caver_example),
+            AsyncImage(
+                model = book.imageUri?: R.drawable.book_caver_example,
                 contentDescription = null,
                 modifier = Modifier
                     .width(Dimens.BookCoverWidthSmall)
-                    .height(Dimens.BookCoverHeightSmall),
+                    .height(Dimens.BookCoverHeightSmall)
+                    .clip(RoundedCornerShape(Dimens.CornerSmall)),
                 contentScale = ContentScale.Crop
             )
 
@@ -215,8 +195,9 @@ fun BookTagCard(
 
                     if (tags.size > MAX_TAGS_TO_SHOW) {
                         Text(
+                            modifier = Modifier.padding(Dimens.SpaceXXSmall),
                             text = stringResource(R.string.more),
-                            style = MaterialTheme.typography.bodyMedium,
+                            style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             textDecoration = TextDecoration.Underline
                         )

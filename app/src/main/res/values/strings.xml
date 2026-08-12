@@ -65,4 +65,7 @@
     <string name="delete_book_message">Are you sure you want to delete \"%1$s\"? This cannot be undone.</string>
     <string name="delete">Delete</string>
     <string name="cancel">Cancel</string>
+
+    <string name="edit_book">Edit book</string>
+    <string name="edit">Edit</string>
 </resources>

@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Transaction
+import androidx.room.Update
 import com.example.pocketlibrary.data.local.entity.BookEntity
 import com.example.pocketlibrary.data.local.entity.BookWithTags
 import kotlinx.coroutines.flow.Flow
@@ -14,8 +15,11 @@ interface BookDao {
     @Insert
     suspend fun insertBook(book: BookEntity): Long
 
+    @Update
+    suspend fun updateBook(book: BookEntity)
+
     @Transaction
-    @Query("SELECT * FROM books ORDER BY title")
+    @Query("SELECT * FROM books ORDER BY bookId DESC")
     fun observeBooksWithTags(): Flow<List<BookWithTags>>
 
     @Transaction

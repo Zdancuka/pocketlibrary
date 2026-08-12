@@ -13,5 +13,5 @@ data class BookEntity(
     val pageNumber: Int? = null,
     val bookDescription: String? = null,
     val bookNotes: String? = null,
-    val imageRes: String? = null,
+    val imageUri: String? = null,
 )

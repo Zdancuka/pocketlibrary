@@ -16,8 +16,9 @@ import androidx.navigation.navArgument
 import com.example.pocketlibrary.PocketLibraryApplication
 import com.example.pocketlibrary.ui.screen.AddBookScreenVisual
 import com.example.pocketlibrary.ui.screen.BookDetailsScreen
+import com.example.pocketlibrary.ui.screen.EditBookScreenVisual
 import com.example.pocketlibrary.ui.screen.LibraryScreen
-import com.example.pocketlibrary.ui.screen.TagScreen
+import com.example.pocketlibrary.ui.screen.SearchScreen
 import com.example.pocketlibrary.ui.viewmodel.BookViewModel
 
 @Composable
@@ -44,14 +45,13 @@ fun PocketLibraryNavigation() {
             modifier = Modifier.padding(padding)
         ) {
 
-            composable(Screen.Tags.route) {
-                TagScreen(
+            composable(Screen.Search.route) {
+                SearchScreen(
                     bookViewModel = bookViewModel,
                     onBookClick = {
                         bookWithTags->
                         navController.navigate(
-                            Screen.Details.createRoute(bookWithTags.book.bookId
-                            )
+                            Screen.Details.createRoute(bookWithTags.book.bookId)
                         )
                     }
                 )
@@ -90,11 +90,30 @@ fun PocketLibraryNavigation() {
                 val bookWithTags by bookViewModel.bookFlow(bookId).collectAsState(initial = null)
 
                 bookWithTags?.let { details ->
-                    // Typo was `detalis`.
                     BookDetailsScreen(
                         bookWithTags = details,
                         bookViewModel = bookViewModel,
                         navController = navController
+                    )
+                }
+            }
+
+            composable (
+                route = Screen.Edit.route,
+                arguments = listOf(navArgument("bookId"){
+                    type = NavType.LongType })
+            ) { backStackEntry ->
+                // Magic number fallback, better move to a named const for readability.
+                val bookId = backStackEntry.arguments?.getLong("bookId") ?: 0L
+                val bookWithTags by bookViewModel.bookFlow(bookId).collectAsState(initial = null)
+
+                bookWithTags?.let { details ->
+                    EditBookScreenVisual(
+                        bookWithTags = details,
+                        bookViewModel = bookViewModel,
+                        onBookUpdate = {
+                            navController.popBackStack()
+                        }
                     )
                 }
             }

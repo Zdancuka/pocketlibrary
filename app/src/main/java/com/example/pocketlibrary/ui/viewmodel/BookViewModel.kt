@@ -44,6 +44,12 @@ class BookViewModel (
         }
     }
 
+    fun updateBook(book: BookEntity, tags: List<String>){
+        viewModelScope.launch {
+            repository.updateBookWithTags(book, tags)
+        }
+    }
+
     class Factory(private val repository: BookRepository): ViewModelProvider.Factory{
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             @Suppress ("UNCHECKED_CAST")
