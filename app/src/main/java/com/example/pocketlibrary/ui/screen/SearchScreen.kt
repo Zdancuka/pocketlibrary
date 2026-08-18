@@ -22,9 +22,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
@@ -45,27 +42,10 @@ fun SearchScreen(
     onBookClick: (BookWithTags) -> Unit = { }
 ) {
 
-    val books by bookViewModel.books.collectAsState()
-    var query by remember { mutableStateOf("") }
-
-    val filteredBooks = if (query.isBlank()){
-        books
-    }else {
-        books.filter { bookWithTags ->
-             bookWithTags.book.title.contains (
-                    query,
-            ignoreCase = true
-            ) || bookWithTags.book.author.contains (
-                 query,
-                 ignoreCase = true
-             ) || bookWithTags.tags.any{tag->
-                tag.name.contains(
-                    query,
-                    ignoreCase = true
-                )
-            }
-        }
-    }
+    // query and filteredBooks come from the ViewModel (via combine) instead of being
+    // computed here on every recomposition — see BookViewModel.searchQuery / filteredBooks.
+    val query by bookViewModel.searchQuery.collectAsState()
+    val filteredBooks by bookViewModel.filteredBooks.collectAsState()
 
     LazyColumn(
         modifier = Modifier
@@ -91,7 +71,7 @@ fun SearchScreen(
 
         item { SearchBar(
             query = query,
-            onQueryChange = {query = it}
+            onQueryChange = { bookViewModel.onSearchQueryChange(it) }
             )
         }
 

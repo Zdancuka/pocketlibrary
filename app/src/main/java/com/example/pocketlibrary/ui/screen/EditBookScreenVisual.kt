@@ -254,7 +254,7 @@ fun EditBookScreenVisual(
         item {
             Button(
                 onClick = {
-                    val pageCount = pageCountText.toIntOrNull() ?: 0
+                    val pageCount = pageCountText.toIntOrNull()
                     bookViewModel.updateBook(
                         book = book.copy(
                             title = title,

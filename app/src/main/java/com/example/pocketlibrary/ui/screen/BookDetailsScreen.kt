@@ -108,10 +108,9 @@ fun BookDetailsScreen(
 
             DetailsTop(
                 book = book,
-                navController = navController,
-                onDeleteClick = {
-                    showDeleteDialog = true
-                }
+                onBack = { navController.popBackStack() },
+                onEditClick = { navController.navigate(Screen.Edit.createRoute(book.bookId)) },
+                onDeleteClick = { showDeleteDialog = true }
             )
         }
 
@@ -184,10 +183,14 @@ fun BookDetailsScreen(
     }
 }
 
+// DetailsTop receives lambdas instead of NavHostController so it stays navigation-agnostic:
+// it does not need to know how navigation works, only that something should happen on click.
+// This also makes it possible to @Preview this composable without a real NavController.
 @Composable
 fun DetailsTop(
     book: BookEntity,
-    navController: NavHostController,
+    onBack: () -> Unit,
+    onEditClick: () -> Unit,
     onDeleteClick: () -> Unit
 ) {
 
@@ -204,11 +207,7 @@ fun DetailsTop(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
 
-            IconButton(
-                onClick = {
-                    navController.popBackStack()
-                }
-            ) {
+            IconButton(onClick = onBack) {
                 Icon(
                     painter = painterResource(R.drawable.ic_arrow_back),
                     contentDescription = "Back",
@@ -216,11 +215,7 @@ fun DetailsTop(
                 )
             }
 
-            IconButton(
-                onClick ={
-                    navController.navigate(Screen.Edit.createRoute(book.bookId))
-                }
-            ) {
+            IconButton(onClick = onEditClick) {
                 Icon(
                     painter = painterResource(R.drawable.ic_edit),
                     contentDescription = "Edit",
