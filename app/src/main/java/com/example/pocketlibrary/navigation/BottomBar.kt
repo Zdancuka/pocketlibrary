@@ -45,8 +45,8 @@ fun BottomBar(navController: NavController) {
                 }
             }) {
                 Icon(
-                    painter = painterResource(R.drawable.ic_tag),
-                    contentDescription = "Tags",
+                    painter = painterResource(R.drawable.ic_search),
+                    contentDescription = "Search",
                     tint = if (currentRoute == Screen.Search.route)
                         MaterialTheme.colorScheme.onSurface
                     else

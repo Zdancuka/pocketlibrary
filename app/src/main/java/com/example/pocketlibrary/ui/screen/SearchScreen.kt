@@ -61,7 +61,7 @@ fun SearchScreen(
 
         item {
             Text(
-                text = stringResource(R.string.tags),
+                text = stringResource(R.string.search_title),
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.titleLarge,
@@ -79,9 +79,9 @@ fun SearchScreen(
             Text(
                 text =
                     if (query.isBlank())
-                        stringResource(R.string.books_with_tag)
+                        stringResource(R.string.no_text_yet)
                     else
-                        stringResource(R.string.books_with_tag) + " \"$query\" ",
+                        stringResource(R.string.books_with_word) + " \"$query\"",
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface
             )

@@ -124,7 +124,7 @@ fun BookDetailsScreen(
 
             item {
                 Text(
-                    stringResource(R.string.book_details_tags_title),
+                    stringResource(R.string.tags),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface
                 )
@@ -150,7 +150,7 @@ fun BookDetailsScreen(
 
             item {
                 Text(
-                    text = stringResource(R.string.book_details_description_title),
+                    text = stringResource(R.string.description),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface
                 )
@@ -166,7 +166,7 @@ fun BookDetailsScreen(
 
             item {
                 Text(
-                    text = stringResource(R.string.book_details_notes_title),
+                    text = stringResource(R.string.notes),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface
                 )

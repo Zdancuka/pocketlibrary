@@ -1,35 +1,8 @@
 <resources>
     <string name="app_name">Pocket Library</string>
 
-    <string name="book_details_tags_title">My Tags</string>
-    <string name="book_details_description_title">Description</string>
-    <string name="book_details_notes_title">Notes</string>
-
     <string name="show_more">Show more</string>
     <string name="show_less">Show less</string>
-
-    <string name="book_title">Book Title</string>
-    <string name="book_long_title">Book Long Title Example</string>
-    <string name="author_name">Author Name</string>
-
-    <string name="book_en_language">EN</string>
-    <string name="book_page_number">420</string>
-    <string name="book_description_example">
-        "Into the Unknown" is a captivating fiction drama
-        novel that weaves a tale of mystery and self-discovery.
-        The story follows Emma Carter, a young woman grappling
-        with the sudden disappearance of her father, a renowned
-        explorer. As she delves into his cryptic journals, Emma
-        uncovers secrets about his expeditions to uncharted
-        territories and the enigmatic clues he left behind.
-        </string>
-    <string name="book_notes_example">I really enjoy rereading it.
-        It\'s a wonderful book to spend time with on a May evening,
-        because I encounter so many interesting stories and people
-        in the community. For the most part, the characters acted
-        logically.</string>
-
-    <string name="tag_tag">Tag</string>
 
     <string name="save">Save</string>
     <string name="add_a_book">Add a book</string>
@@ -53,8 +26,9 @@
 
     <string name="tags">Tags</string>
     <string name="search">Search…</string>
+    <string name="search_title">Search</string>
     <string name="tag_search_history">Tag search history</string>
-    <string name="books_with_tag">Books with a tag </string>
+    <string name="books_with_word">Books with word </string>
 
     <string name="tag_lunch">Idea for lunch</string>
     <string name="more">…more</string>
@@ -68,4 +42,5 @@
 
     <string name="edit_book">Edit book</string>
     <string name="edit">Edit</string>
+    <string name="no_text_yet">No search input yet…</string>
 </resources>

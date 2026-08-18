@@ -50,10 +50,11 @@ fun LibraryScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surfaceVariant)
-            .padding(Dimens.SpaceMedium),
+            .padding( top = Dimens.SpaceLarge),
         contentPadding = PaddingValues(Dimens.SpaceMedium),
         verticalArrangement = Arrangement.spacedBy(Dimens.SpaceMedium),
-        horizontalArrangement = Arrangement.spacedBy(Dimens.SpaceMedium)
+        horizontalArrangement = Arrangement.spacedBy(Dimens.SpaceMedium),
+
     ){
         items (books) {bookWithTags ->
             BookCard(
