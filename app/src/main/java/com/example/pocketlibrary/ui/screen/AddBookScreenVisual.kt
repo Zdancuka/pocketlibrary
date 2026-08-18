@@ -1,5 +1,9 @@
 package com.example.pocketlibrary.ui.screen
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -45,14 +49,18 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import com.example.pocketlibrary.data.local.entity.BookEntity
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import coil3.compose.AsyncImage
 import com.example.pocketlibrary.ui.viewmodel.BookViewModel
 
-// This screen got pretty big, so splitting chunks like header/tags section makes it way easier to read and reuse.
+
 @Composable
 fun AddBookScreenVisual(
     bookViewModel: BookViewModel,
     onBookSaved: () -> Unit = {}
 ) {
+    val context = LocalContext.current
 
     var title by remember { mutableStateOf("") }
     var author by remember { mutableStateOf("")}
@@ -62,6 +70,19 @@ fun AddBookScreenVisual(
     var notes by remember { mutableStateOf("")}
     var tagInput by remember { mutableStateOf("")}
     var tags by remember { mutableStateOf(listOf<String>()) }
+    var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
+
+    val imagePickerLaunch = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia()
+    ) { uri ->
+        if (uri != null){
+            context.contentResolver.takePersistableUriPermission(
+                uri,
+                android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION
+            )
+            selectedImageUri = uri
+        }
+    }
 
     fun addCurrentTag(){
         val trimmed = tagInput.trim()
@@ -80,13 +101,22 @@ fun AddBookScreenVisual(
             .verticalScroll(rememberScrollState())
             .padding(horizontal = Dimens.SpaceLarge, vertical = Dimens.SpaceLarge)
     ) {
-        AddBookHeader()
+
+        AddBookHeader(
+            selectedImageUri = selectedImageUri,
+            onImageClick = {
+                imagePickerLaunch.launch(
+                    PickVisualMediaRequest(
+                        ActivityResultContracts.PickVisualMedia.ImageOnly)
+                )
+            }
+        )
 
         LabeledField(
             label = stringResource(R.string.title),
             value = title,
             onValueChange = { title = it },
-            placeholder = stringResource(R.string.the_star)
+            placeholder = stringResource(R.string.enter_title)
         )
 
         Spacer(modifier = Modifier.height(Dimens.SpaceXLarge))
@@ -95,7 +125,7 @@ fun AddBookScreenVisual(
             label = stringResource(R.string.author),
             value = author,
             onValueChange = { author = it },
-            placeholder = stringResource(R.string.enter_the_author)
+            placeholder = stringResource(R.string.enter_author)
         )
 
         Spacer(modifier = Modifier.height(Dimens.SpaceXLarge))
@@ -106,7 +136,7 @@ fun AddBookScreenVisual(
                     label = stringResource(R.string.total_pages),
                     value = pageCountText,
                     onValueChange = { new -> if (new.all { it.isDigit() }) pageCountText = new },
-                    placeholder = stringResource(R.string.enter_the_page_number),
+                    placeholder = stringResource(R.string.enter_page_number),
                     keyboardType = KeyboardType.Number
                 )
             }
@@ -115,7 +145,7 @@ fun AddBookScreenVisual(
                     label = stringResource(R.string.language),
                     value = language,
                     onValueChange = { language = it },
-                    placeholder = stringResource(R.string.enter_the_language)
+                    placeholder = stringResource(R.string.enter_language)
                 )
             }
         }
@@ -127,7 +157,7 @@ fun AddBookScreenVisual(
             label = stringResource(R.string.description),
             value = description,
             onValueChange = { description = it },
-            placeholder = stringResource(R.string.enter_the_description)
+            placeholder = stringResource(R.string.enter_description)
         )
 
         Spacer(modifier = Modifier.height(Dimens.SpaceXLarge))
@@ -210,7 +240,7 @@ fun AddBookScreenVisual(
             label = stringResource(R.string.notes),
             value = notes,
             onValueChange = { notes = it },
-            placeholder = stringResource(R.string.enter_the_notes)
+            placeholder = stringResource(R.string.enter_notes)
         )
 
         Spacer(modifier = Modifier.height(Dimens.SpaceXXXLarge))
@@ -225,7 +255,8 @@ fun AddBookScreenVisual(
                         language = language,
                         pageNumber = pageCount,
                         bookDescription = description,
-                        bookNotes = notes
+                        bookNotes = notes,
+                        imageUri = selectedImageUri?.toString()
                     ),
                     tags = tags
                 )
@@ -251,19 +282,14 @@ fun AddBookScreenVisual(
 }
 
 @Composable
-private fun AddBookHeader() {
-    Text(
-        text = stringResource(R.string.save),
-        modifier = Modifier.fillMaxWidth(),
-        textAlign = TextAlign.Center,
-        fontWeight = FontWeight.Bold,
-        color = MaterialTheme.colorScheme.onSurface
-    )
-
-    Spacer(modifier = Modifier.height(Dimens.SpaceXLarge))
-
+fun AddBookHeader(
+    selectedImageUri: Uri?,
+    onImageClick: () -> Unit
+) {
     Text(
         text = stringResource(R.string.add_a_book),
+        modifier = Modifier.fillMaxSize(),
+        textAlign = TextAlign.Center,
         fontWeight = FontWeight.Bold,
         color = MaterialTheme.colorScheme.onSurface
     )
@@ -277,101 +303,35 @@ private fun AddBookHeader() {
     ) {
         Box(
             modifier = Modifier
-                .width(Dimens.ImagePlaceholderWidth)
-                .height(Dimens.ImagePlaceholderHeight)
+                .width(Dimens.BookCoverWidthMedium)
+                .height(Dimens.BookCoverHeightMedium)
                 .clip(RoundedCornerShape(Dimens.CornerLarge))
                 .background(MaterialTheme.colorScheme.background)
                 .border(
                     Dimens.BorderThin,
                     MaterialTheme.colorScheme.surface,
                     RoundedCornerShape(Dimens.CornerLarge)
-                ),
+                )
+                .clickable{onImageClick ()},
             contentAlignment = Alignment.Center
         ) {
-            Image(
-                painter = painterResource(R.drawable.ic_image_placeholder),
-                contentDescription = null,
-            )
+            if (selectedImageUri != null) {
+                AsyncImage(
+                    model = selectedImageUri,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(Dimens.CornerLarge)),
+                    contentScale = ContentScale.Crop
+                )
+            } else {
+                Image(
+                    painter = painterResource(R.drawable.ic_image_placeholder),
+                    contentDescription = null,
+                )
+            }
         }
     }
 
     Spacer(modifier = Modifier.height(Dimens.SpaceMedium))
-}
-
-
-@Composable
-private fun LabeledField(
-    label: String,
-    value: String,
-    onValueChange: (String) -> Unit,
-    placeholder: String,
-    modifier: Modifier = Modifier,
-    keyboardType: KeyboardType = KeyboardType.Text
-) {
-    Column(modifier = modifier) {
-        Text(
-            text = label,
-            color = MaterialTheme.colorScheme.onSurface
-        )
-
-        Spacer(modifier = Modifier.height(Dimens.SpaceXSmall))
-
-        TextField(
-            value = value,
-            onValueChange = onValueChange,
-            placeholder = {
-                Text(
-                    placeholder,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(Dimens.CornerXSmall)),
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
-            colors = TextFieldDefaults.colors(
-                unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                focusedContainerColor = MaterialTheme.colorScheme.surface,
-                unfocusedIndicatorColor = Color.Transparent,
-                focusedIndicatorColor = Color.Transparent
-            )
-            
-        )
-    }
-}
-
-@Composable
-private fun LabeledMultilineField(
-    label: String,
-    value: String,
-    onValueChange: (String) -> Unit,
-    placeholder: String,
-    modifier: Modifier = Modifier,
-) {
-    Column(modifier = modifier) {
-        Text(
-            text = label,
-            color = MaterialTheme.colorScheme.onSurface
-        )
-
-        Spacer(modifier = Modifier.height(Dimens.SpaceMedium))
-
-        TextField(
-            value = value,
-            onValueChange = onValueChange,
-            placeholder = {
-                Text(placeholder, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(Dimens.CornerXSmall)),
-            colors = TextFieldDefaults.colors(
-                unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                focusedContainerColor = MaterialTheme.colorScheme.surface,
-                unfocusedIndicatorColor = Color.Transparent,
-                focusedIndicatorColor = Color.Transparent
-            )
-        )
-    }
 }

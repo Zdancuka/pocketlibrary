@@ -2,6 +2,8 @@ package com.example.pocketlibrary
 
 import android.app.Application
 import androidx.room.Room
+import androidx.room.RoomDatabase
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.example.pocketlibrary.data.local.database.PocketLibraryDatabase
 import com.example.pocketlibrary.data.repository.BookRepository
 
@@ -20,7 +22,14 @@ class PocketLibraryApplication: Application() {
             applicationContext,
             PocketLibraryDatabase::class.java,
             "pocket_library.db"
-        ).build()
+        )
+            // SQLite disables foreign key enforcement by default; enable it per connection
+            .addCallback(object : RoomDatabase.Callback() {
+                override fun onOpen(db: SupportSQLiteDatabase) {
+                    db.execSQL("PRAGMA foreign_keys = ON")
+                }
+            })
+            .build()
 
         bookRepository = BookRepository(database)
     }
