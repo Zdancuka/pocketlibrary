@@ -15,7 +15,7 @@ object Dimens {
     val SpaceXXLarge = 28.dp
     val SpaceXXXLarge = 32.dp
 
-    // Сorner radius
+    // Corner radius
     val CornerXSmall = 4.dp
     val CornerSmall = 6.dp
     val CornerLarge = 12.dp
@@ -23,6 +23,7 @@ object Dimens {
     val CornerPill = 20.dp
 
     // Icon sizes
+    val IconSize = 24.dp
     val IconSizeSmall = 18.dp
 
     // Book cover dimensions
@@ -48,5 +49,6 @@ object Dimens {
 
     val BlurRadius = 5.dp
 
-    val IconEditSize = 24.dp
+    val BookCardMinWidth = 150.dp
+
 }

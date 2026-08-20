@@ -1,4 +1,4 @@
-package com.example.pocketlibrary.ui.screen
+package com.example.pocketlibrary.ui.screen.element
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.padding

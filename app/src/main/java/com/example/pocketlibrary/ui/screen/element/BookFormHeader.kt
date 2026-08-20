@@ -1,4 +1,4 @@
-package com.example.pocketlibrary.ui.screen
+package com.example.pocketlibrary.ui.screen.element
 
 import android.net.Uri
 import androidx.compose.foundation.Image
@@ -20,7 +20,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import coil3.compose.AsyncImage
 import com.example.pocketlibrary.R

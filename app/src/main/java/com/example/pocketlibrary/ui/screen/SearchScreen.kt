@@ -31,6 +31,9 @@ import androidx.compose.ui.text.style.TextDecoration
 import coil3.compose.AsyncImage
 import com.example.pocketlibrary.R
 import com.example.pocketlibrary.data.local.entity.BookWithTags
+import com.example.pocketlibrary.ui.screen.element.OutlinedTag
+import com.example.pocketlibrary.ui.screen.element.SearchBar
+import com.example.pocketlibrary.ui.screen.element.SwipeToDeleteCard
 import com.example.pocketlibrary.ui.theme.Dimens
 import com.example.pocketlibrary.ui.viewmodel.BookViewModel
 
@@ -69,9 +72,10 @@ fun SearchScreen(
             )
         }
 
-        item { SearchBar(
-            query = query,
-            onQueryChange = { bookViewModel.onSearchQueryChange(it) }
+        item {
+            SearchBar(
+                query = query,
+                onQueryChange = { bookViewModel.onSearchQueryChange(it) }
             )
         }
 
@@ -88,11 +92,16 @@ fun SearchScreen(
         }
 
 
-        items(filteredBooks) { bookWithTags ->
-            BookTagCard(
+        items(filteredBooks, key = {it.book.bookId}) { bookWithTags ->
+            SwipeToDeleteCard(
                 bookWithTags = bookWithTags,
-                onClick = { onBookClick(bookWithTags) }
-            )
+                bookViewModel = bookViewModel
+            ) {
+                BookTagCard(
+                    bookWithTags = bookWithTags,
+                    onClick = { onBookClick(bookWithTags) }
+                )
+            }
         }
 
         if (filteredBooks.isEmpty()){

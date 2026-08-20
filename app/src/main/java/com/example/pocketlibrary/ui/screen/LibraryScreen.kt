@@ -31,11 +31,9 @@ import androidx.compose.ui.text.style.TextAlign
 import coil3.compose.AsyncImage
 import com.example.pocketlibrary.R
 import com.example.pocketlibrary.data.local.entity.BookWithTags
+import com.example.pocketlibrary.ui.screen.element.SwipeToDeleteCard
 import com.example.pocketlibrary.ui.theme.Dimens
 import com.example.pocketlibrary.ui.viewmodel.BookViewModel
-
-//If it is const need to be declared here like this.
-private const val COLUMN_NUMBER = 2
 
 @Composable
 fun LibraryScreen(
@@ -46,7 +44,7 @@ fun LibraryScreen(
     val books by bookViewModel.books.collectAsState()
 
     LazyVerticalGrid(
-        columns = GridCells.Fixed(COLUMN_NUMBER),
+        columns = GridCells.Adaptive(minSize = Dimens.BookCardMinWidth),
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surfaceVariant)
@@ -56,11 +54,16 @@ fun LibraryScreen(
         horizontalArrangement = Arrangement.spacedBy(Dimens.SpaceMedium),
 
     ){
-        items (books) {bookWithTags ->
-            BookCard(
+        items (books, key ={it.book.bookId}) {bookWithTags ->
+            SwipeToDeleteCard(
                 bookWithTags = bookWithTags,
-                onClick = { onBookClick(bookWithTags) }
-            )
+                bookViewModel = bookViewModel
+            ) {
+                BookCard(
+                    bookWithTags = bookWithTags,
+                    onClick = { onBookClick(bookWithTags) }
+                )
+            }
         }
 
         if (books.isEmpty()){
