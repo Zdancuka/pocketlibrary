@@ -12,13 +12,16 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavType
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
 import com.example.pocketlibrary.PocketLibraryApplication
 import com.example.pocketlibrary.ui.screen.AddBookScreenVisual
+import com.example.pocketlibrary.ui.screen.AuthScreen
 import com.example.pocketlibrary.ui.screen.BookDetailsScreen
 import com.example.pocketlibrary.ui.screen.EditBookScreenVisual
 import com.example.pocketlibrary.ui.screen.LibraryScreen
 import com.example.pocketlibrary.ui.screen.SearchScreen
+import com.example.pocketlibrary.ui.viewmodel.AuthViewModel
 import com.example.pocketlibrary.ui.viewmodel.BookViewModel
 
 @Composable
@@ -32,18 +35,43 @@ fun PocketLibraryNavigation() {
         factory = BookViewModel.Factory(app.bookRepository)
     )
 
+    val authViewModel: AuthViewModel = viewModel()
+
+    val startDestination = if (authViewModel.currentUser != null){
+        Screen.Library.route
+    } else {
+        Screen.Auth.route
+    }
+
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
 
     Scaffold(
         bottomBar = {
-            BottomBar(navController = navController)
+            if (currentRoute != Screen.Auth.route){
+                BottomBar(navController = navController)
+            }
         }
     ) { padding ->
 
         NavHost(
             navController = navController,
-            startDestination = Screen.Library.route,
+            startDestination = startDestination,
             modifier = Modifier.padding(padding)
         ) {
+
+            composable (Screen.Auth.route){
+                AuthScreen(
+                    authViewModel = authViewModel,
+                    onAuthSuccess = {
+                        navController.navigate(Screen.Library.route){
+                            popUpTo (Screen.Auth.route) {
+                                inclusive = true
+                            }
+                        }
+                    }
+                )
+            }
 
             composable(Screen.Search.route) {
                 SearchScreen(
