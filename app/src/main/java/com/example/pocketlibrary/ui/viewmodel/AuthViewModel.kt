@@ -10,12 +10,6 @@ import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException
 import com.google.firebase.auth.FirebaseUser
 
-sealed class AuthState {
-    data object Idle: AuthState()
-    data object Loading: AuthState()
-    data class Error(val message: String) : AuthState()
-}
-
 class AuthViewModel: ViewModel(){
     private val auth = FirebaseAuth.getInstance()
 

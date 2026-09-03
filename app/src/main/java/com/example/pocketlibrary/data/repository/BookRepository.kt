@@ -23,6 +23,11 @@ class BookRepository(
 
     suspend fun deleteBook(uid: String, bookId: String){
         database.bookDao().deleteBookAndRef(uid, bookId)
+        runCatching {
+            remoteDataSource.deleteBook(uid, bookId)
+        }.onFailure { e->
+            e.printStackTrace()
+        }
     }
 
     suspend fun addBookWithTags(
