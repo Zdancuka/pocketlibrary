@@ -2,7 +2,6 @@ package com.example.pocketlibrary.data.local.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import androidx.room.Update
 import java.util.UUID
 
 @Entity (tableName = "books")

@@ -1,15 +1,12 @@
 package com.example.pocketlibrary.data.repository
 
-import androidx.compose.ui.text.resolveDefaults
 import androidx.room.withTransaction
-import com.example.pocketlibrary.data.local.dao.BookDao
 import com.example.pocketlibrary.data.local.database.PocketLibraryDatabase
 import com.example.pocketlibrary.data.local.entity.BookEntity
 import com.example.pocketlibrary.data.local.entity.BookTagCrossRef
 import com.example.pocketlibrary.data.local.entity.TagEntity
 import com.example.pocketlibrary.data.remote.BookDto
 import com.example.pocketlibrary.data.remote.BookRemoteDataSource
-import kotlin.String
 
 class BookRepository(
     private val database: PocketLibraryDatabase,

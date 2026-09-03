@@ -1,6 +1,5 @@
 package com.example.pocketlibrary.data.remote
 
-import com.example.pocketlibrary.data.local.entity.BookEntity
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 

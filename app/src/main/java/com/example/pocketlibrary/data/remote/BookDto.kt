@@ -1,8 +1,5 @@
 package com.example.pocketlibrary.data.remote
 
-import androidx.room.PrimaryKey
-import java.util.UUID
-
 data class BookDto (
     val bookId: String = "",
     val title: String,
