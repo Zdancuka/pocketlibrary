@@ -36,9 +36,7 @@ fun BottomBar(navController: NavController) {
             ) {
 
             IconButton(onClick = {
-                //Tapping the same tab twice pushes a new copy of the screen onto the back stack.
-                // The idiomatic fix is to use launchSingleTop = true and popUpTo the start destination:
-                navController.navigate(Screen.Search.route) {
+               navController.navigate(Screen.Search.route) {
                     popUpTo(Screen.Library.route) { saveState = true }
                     launchSingleTop = true
                     restoreState = true
@@ -58,7 +56,7 @@ fun BottomBar(navController: NavController) {
                 Icon(
                     painter = painterResource(R.drawable.ic_home),
                     contentDescription = "Library",
-                    tint = if (currentRoute == Screen.Search.route)
+                    tint = if (currentRoute == Screen.Library.route)
                         MaterialTheme.colorScheme.onSurface
                     else
                         MaterialTheme.colorScheme.onSurfaceVariant
@@ -69,7 +67,18 @@ fun BottomBar(navController: NavController) {
                 Icon(
                     painter = painterResource(R.drawable.ic_upload),
                     contentDescription = "Add book",
-                    tint = if (currentRoute == Screen.Search.route)
+                    tint = if (currentRoute == Screen.AddBook.route)
+                        MaterialTheme.colorScheme.onSurface
+                    else
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            IconButton(onClick = { navController.navigate(Screen.Profile.route) }) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_profile),
+                    contentDescription = "Profile",
+                    tint = if (currentRoute == Screen.Profile.route)
                         MaterialTheme.colorScheme.onSurface
                     else
                         MaterialTheme.colorScheme.onSurfaceVariant

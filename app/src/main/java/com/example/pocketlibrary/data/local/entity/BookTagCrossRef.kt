@@ -21,6 +21,6 @@ import androidx.room.Index
     indices = [Index(value = ["tagId"]), Index(value = ["bookId"])]
 )
 data class BookTagCrossRef(
-    val bookId: Long,
+    val bookId: String,
     val tagId: Long
 )

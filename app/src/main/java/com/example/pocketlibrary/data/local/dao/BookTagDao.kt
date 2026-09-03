@@ -11,5 +11,5 @@ interface BookTagDao {
     suspend fun insertAll(refs: List<BookTagCrossRef>)
 
     @Query("DELETE FROM book_tag_cross_ref WHERE bookId = :bookID")
-    suspend fun deleteCrossRefsForBook(bookID: Long)
+    suspend fun deleteCrossRefsForBook(bookID: String)
 }

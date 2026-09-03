@@ -52,6 +52,7 @@
 
     <string name="auth_sign_in">Sign in</string>
     <string name="auth_sign_up">Sign up</string>
+    <string name="auth_sign_out">Sign out</string>
     <string name="auth_loading">…</string>
 
     <string name="auth_already_have_account">Already have an account? Sign in</string>
@@ -59,4 +60,7 @@
 
     <string name="auth_sign_up_failed">Sign up failed</string>
     <string name="auth_sign_in_failed">Sign in failed</string>
+
+    <string name="auth_error_invalid_email">Please enter a valid email address</string>
+    <string name="auth_error_weak_password">Password must be at least 6 characters</string>
 </resources>

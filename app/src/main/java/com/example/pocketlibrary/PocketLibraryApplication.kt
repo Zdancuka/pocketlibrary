@@ -5,6 +5,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.example.pocketlibrary.data.local.database.PocketLibraryDatabase
+import com.example.pocketlibrary.data.remote.BookRemoteDataSource
 import com.example.pocketlibrary.data.repository.BookRepository
 
 class PocketLibraryApplication: Application() {
@@ -23,7 +24,7 @@ class PocketLibraryApplication: Application() {
             PocketLibraryDatabase::class.java,
             "pocket_library.db"
         )
-            // SQLite disables foreign key enforcement by default; enable it per connection
+            .fallbackToDestructiveMigration(dropAllTables = true)
             .addCallback(object : RoomDatabase.Callback() {
                 override fun onOpen(db: SupportSQLiteDatabase) {
                     db.execSQL("PRAGMA foreign_keys = ON")
@@ -31,6 +32,9 @@ class PocketLibraryApplication: Application() {
             })
             .build()
 
-        bookRepository = BookRepository(database)
+        bookRepository = BookRepository(
+            database = database,
+            remoteDataSource = BookRemoteDataSource()
+        )
     }
 }

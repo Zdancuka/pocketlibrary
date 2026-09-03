@@ -1,5 +1,6 @@
 package com.example.pocketlibrary.ui.screen
 
+import android.util.Patterns
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -28,6 +29,8 @@ import com.example.pocketlibrary.ui.screen.element.LabeledField
 import com.example.pocketlibrary.ui.theme.Dimens
 import com.example.pocketlibrary.ui.viewmodel.AuthViewModel
 
+private const val MIN_PASSWORD_LENGTH = 6
+
 @Composable
 fun AuthScreen(
     authViewModel : AuthViewModel,
@@ -37,6 +40,31 @@ fun AuthScreen(
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
+    //val authState by authViewModel.authState.collectAsState()
+
+    var emailTouched by remember { mutableStateOf(false) }
+    var passwordTouched by remember { mutableStateOf(false) }
+
+    val isEmailValid = Patterns.EMAIL_ADDRESS.matcher(email).matches()
+    val isPasswordValid = password.length >= MIN_PASSWORD_LENGTH
+
+    val emailError = when {
+        !emailTouched || email.isEmpty() -> null
+        !isEmailValid -> stringResource(R.string.auth_error_invalid_email)
+        else -> null
+    }
+
+    val passwordError = when {
+        !passwordTouched || password.isEmpty() -> null
+        isSignUpMode && !isPasswordValid -> stringResource(R.string.auth_error_weak_password)
+        else -> null
+    }
+
+    val canSubmit = email.isNotBlank() &&
+            password.isNotBlank() &&
+            isEmailValid &&
+            (!isSignUpMode || isPasswordValid) &&
+            !authViewModel.isLoading
 
     Column(
         modifier = Modifier
@@ -109,9 +137,7 @@ fun AuthScreen(
                     )
                 }
             },
-            enabled = email.isNotBlank() &&
-                    password.isNotBlank() &&
-                    !authViewModel.isLoading,
+            enabled = canSubmit,
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.primary,
@@ -139,6 +165,9 @@ fun AuthScreen(
         TextButton(
             onClick = {
                 isSignUpMode = ! isSignUpMode
+                emailTouched = false
+                passwordTouched = false
+                authViewModel.clearError()
             },
             modifier = Modifier.fillMaxWidth()
         ) {

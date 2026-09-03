@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.VisualTransformation
 import com.example.pocketlibrary.ui.theme.Dimens
 
 @Composable
@@ -24,7 +25,9 @@ fun LabeledField(
     onValueChange: (String) -> Unit,
     placeholder: String,
     modifier: Modifier = Modifier,
-    keyboardType: KeyboardType = KeyboardType.Text
+    keyboardType: KeyboardType = KeyboardType.Text,
+    isError: Boolean = false,
+    errorText: String? = null,
 ) {
     Column(modifier = modifier) {
         Text(
@@ -52,10 +55,20 @@ fun LabeledField(
                 unfocusedContainerColor = MaterialTheme.colorScheme.surface,
                 focusedContainerColor = MaterialTheme.colorScheme.surface,
                 unfocusedIndicatorColor = Color.Transparent,
-                focusedIndicatorColor = Color.Transparent
+                focusedIndicatorColor = Color.Transparent,
+                errorIndicatorColor = MaterialTheme.colorScheme.error,
+                errorContainerColor = MaterialTheme.colorScheme.surface
             )
-
         )
+
+        if (isError && errorText != null){
+            Spacer(modifier = Modifier.height(Dimens.SpaceSmall))
+            Text(
+                text = errorText,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall
+            )
+        }
     }
 }
 

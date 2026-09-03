@@ -24,7 +24,7 @@ object Dimens {
 
     // Icon sizes
     val IconSize = 24.dp
-    val IconSizeSmall = 18.dp
+    val IconLargeSize = 18.dp
 
     // Book cover dimensions
     val BookCoverWidthSmall = 95.dp
@@ -51,4 +51,5 @@ object Dimens {
 
     val BookCardMinWidth = 150.dp
 
+    val ProfilePictureSize = 96.dp
 }

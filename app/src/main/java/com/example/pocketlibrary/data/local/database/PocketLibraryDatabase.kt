@@ -12,8 +12,8 @@ import com.example.pocketlibrary.data.local.entity.TagEntity
 @Database(
     entities = [BookEntity::class, TagEntity::class, BookTagCrossRef::class
                ],
-    version = 4,
-    exportSchema = true
+    version = 7,
+    exportSchema = false
 )
 abstract class PocketLibraryDatabase : RoomDatabase() {
 

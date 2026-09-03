@@ -1,4 +1,4 @@
-package com.example.pocketlibrary.ui.screen
+package com.example.pocketlibrary.ui.screen.navbarScreens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable

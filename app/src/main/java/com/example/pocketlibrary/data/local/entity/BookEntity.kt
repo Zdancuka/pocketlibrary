@@ -2,11 +2,14 @@ package com.example.pocketlibrary.data.local.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import androidx.room.Update
+import java.util.UUID
 
 @Entity (tableName = "books")
 data class BookEntity(
-    @PrimaryKey (autoGenerate = true)
-    val bookId: Long = 0,
+    @PrimaryKey ()
+    val bookId: String = UUID.randomUUID().toString(),
+    val uid : String = "",
     val title: String,
     val author: String,
     val language: String? = null,
@@ -14,4 +17,5 @@ data class BookEntity(
     val bookDescription: String? = null,
     val bookNotes: String? = null,
     val imageUri: String? = null,
+    val updatedAt: Long = System.currentTimeMillis()
 )
