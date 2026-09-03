@@ -17,6 +17,7 @@ import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException
 
+// unused code
 sealed class AuthState {
     data object Idle: AuthState()
     data object Loading: AuthState()
@@ -35,6 +36,28 @@ class AuthViewModel: ViewModel(){
     val currentUser: FirebaseUser?
         get()= auth.currentUser
 
+    // Currently using Java-style callbacks (addOnSuccessListener / addOnFailureListener).
+    // The file already imports kotlinx.coroutines.tasks.await — use it instead.
+    //
+    // The coroutine version is cleaner: the logic reads top-to-bottom,
+    // and `finally` guarantees isLoading resets even if an exception is thrown:
+    //
+    // fun signUp(email: String, password: String, onSuccess: () -> Unit) {
+    //     viewModelScope.launch {
+    //         isLoading = true
+    //         errorMessage = null
+    //         try {
+    //             auth.createUserWithEmailAndPassword(email, password).await()
+    //             onSuccess()
+    //         } catch (e: Exception) {
+    //             errorMessage = mapFirebaseError(e)
+    //         } finally {
+    //             isLoading = false
+    //         }
+    //     }
+    // }
+    //
+    // Same pattern applies to signIn below.
     fun signUp(
         email : String ,
         password : String ,

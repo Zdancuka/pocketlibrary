@@ -71,6 +71,13 @@ class BookRepository(
     }
 
     suspend fun syncFromRemote(uid: String){
+        // this sync only adds or updates books from the remote.
+        // It does NOT delete books that were removed on another device.
+        // Example: user deletes a book on phone A → it is removed from Firestore.
+        // When phone B syncs, that book is simply not in the remote list, so this
+        // loop never sees it and it stays in phone B's local database forever.
+        // To fix this, after upserting remote books, compare local IDs against
+        // remote IDs and delete any local book whose ID is no longer in the remote list.
         val remoteBooks = runCatching { remoteDataSource.fetchAllBooks(uid) }.getOrNull() ?: return
 
         for (dto in remoteBooks){

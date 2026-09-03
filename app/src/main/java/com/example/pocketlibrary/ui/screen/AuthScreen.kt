@@ -100,6 +100,9 @@ fun AuthScreen(
 
         Spacer(modifier = Modifier.height(Dimens.SpaceMedium))
 
+        // keyboardType = KeyboardType.Password  doesn't mask passwort itself.
+        //  Try to apply visualTransformation = PasswordVisualTransformation()
+        //  LabeledField needs a visualTransformation parameter for this to work.
         LabeledField(
             label = stringResource(R.string.auth_password),
             value = password,
