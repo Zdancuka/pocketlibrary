@@ -26,6 +26,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import com.example.pocketlibrary.R
 import com.example.pocketlibrary.ui.screen.element.LabeledField
+import com.example.pocketlibrary.ui.screen.element.PasswordField
 import com.example.pocketlibrary.ui.theme.Dimens
 import com.example.pocketlibrary.ui.viewmodel.AuthViewModel
 
@@ -40,25 +41,11 @@ fun AuthScreen(
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
-    //val authState by authViewModel.authState.collectAsState()
-
     var emailTouched by remember { mutableStateOf(false) }
     var passwordTouched by remember { mutableStateOf(false) }
 
     val isEmailValid = Patterns.EMAIL_ADDRESS.matcher(email).matches()
     val isPasswordValid = password.length >= MIN_PASSWORD_LENGTH
-
-    val emailError = when {
-        !emailTouched || email.isEmpty() -> null
-        !isEmailValid -> stringResource(R.string.auth_error_invalid_email)
-        else -> null
-    }
-
-    val passwordError = when {
-        !passwordTouched || password.isEmpty() -> null
-        isSignUpMode && !isPasswordValid -> stringResource(R.string.auth_error_weak_password)
-        else -> null
-    }
 
     val canSubmit = email.isNotBlank() &&
             password.isNotBlank() &&
@@ -90,25 +77,23 @@ fun AuthScreen(
 
         Spacer(modifier = Modifier.height(Dimens.SpaceXLarge))
 
+        // Email field
         LabeledField(
             label = stringResource(R.string.auth_email),
             value = email,
             onValueChange = { email = it },
             placeholder = stringResource(R.string.auth_email),
-            keyboardType = KeyboardType.Email
+            keyboardType = KeyboardType.Email,
         )
 
         Spacer(modifier = Modifier.height(Dimens.SpaceMedium))
 
-        // keyboardType = KeyboardType.Password  doesn't mask passwort itself.
-        //  Try to apply visualTransformation = PasswordVisualTransformation()
-        //  LabeledField needs a visualTransformation parameter for this to work.
-        LabeledField(
+        // Password field
+        PasswordField(
             label = stringResource(R.string.auth_password),
             value = password,
             onValueChange = { password = it },
             placeholder = stringResource(R.string.auth_password),
-            keyboardType = KeyboardType.Password
         )
 
 
@@ -124,6 +109,7 @@ fun AuthScreen(
 
         Spacer(modifier = Modifier.height(Dimens.SpaceXLarge))
 
+        // Submit button
         Button(
             onClick = {
                 if (isSignUpMode) {
@@ -165,6 +151,7 @@ fun AuthScreen(
 
         Spacer(modifier = Modifier.height(Dimens.SpaceMedium))
 
+        // Toggle between Sign In / Sign Up
         TextButton(
             onClick = {
                 isSignUpMode = ! isSignUpMode

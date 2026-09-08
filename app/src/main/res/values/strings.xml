@@ -63,4 +63,7 @@
 
     <string name="auth_error_invalid_email">Please enter a valid email address</string>
     <string name="auth_error_weak_password">Password must be at least 6 characters</string>
+
+    <string name="show_password">Show password</string>
+    <string name="hide_password">Hide password</string>
 </resources>
