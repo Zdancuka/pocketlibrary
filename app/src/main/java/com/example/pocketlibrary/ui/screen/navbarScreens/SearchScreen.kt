@@ -94,8 +94,8 @@ fun SearchScreen(
 
         items(filteredBooks, key = {it.book.bookId}) { bookWithTags ->
             SwipeToDeleteCard(
-                bookWithTags = bookWithTags,
-                bookViewModel = bookViewModel
+                bookTitle = bookWithTags.book.title,
+                onDelete = { bookViewModel.deleteBook(bookWithTags.book.bookId)}
             ) {
                 BookTagCard(
                     bookWithTags = bookWithTags,

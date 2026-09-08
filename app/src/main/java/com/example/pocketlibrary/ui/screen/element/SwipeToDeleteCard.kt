@@ -26,32 +26,11 @@ import com.example.pocketlibrary.data.local.entity.BookWithTags
 import com.example.pocketlibrary.ui.theme.Dimens
 import com.example.pocketlibrary.ui.viewmodel.BookViewModel
 
-// Right now this component receives the whole BookViewModel and BookWithTags,
-// but it only needs two things: the book title (to show in the dialog) and
-// something to call when the user confirms delete.
-//
-// The cleaner pattern is to pass only a lambda (a simple function):
-//
-// BETTER SIGNATURE:
-// fun SwipeToDeleteCard(
-//     bookTitle: String,       // only the title, not the whole BookWithTags
-//     onDelete: () -> Unit,    // just "do the delete", the caller decides how
-//     content: @Composable () -> Unit
-// )
-//
-// Then the caller (e.g. LibraryScreen) passes the lambda like this:
-// SwipeToDeleteCard(
-//     bookTitle = bookWithTags.book.title,
-//     onDelete = { bookViewModel.deleteBook(bookWithTags.book.bookId) }
-// ) { BookCard(...) }
-//
-// This way SwipeToDeleteCard doesn't know or care about ViewModels at all.
-// Same improvement was applied to DetailsTop earlier — same idea here.
 @OptIn (ExperimentalMaterial3Api::class)
 @Composable
 fun SwipeToDeleteCard(
-    bookWithTags: BookWithTags,
-    bookViewModel: BookViewModel,
+    bookTitle: String,
+    onDelete: () -> Unit,
     content: @Composable () -> Unit
 ){
     var showDeleteDialog by remember { mutableStateOf(false) }
@@ -67,10 +46,10 @@ fun SwipeToDeleteCard(
 
     if (showDeleteDialog) {
         DeleteBookDialog(
-            bookTitle = bookWithTags.book.title,
+            bookTitle = bookTitle,
             onConfirm = {
                 showDeleteDialog = false
-                bookViewModel.deleteBook(bookWithTags.book.bookId)
+                onDelete()
             },
             onDismiss = { showDeleteDialog = false}
         )
