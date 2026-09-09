@@ -12,13 +12,17 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavType
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
 import com.example.pocketlibrary.PocketLibraryApplication
-import com.example.pocketlibrary.ui.screen.AddBookScreenVisual
+import com.example.pocketlibrary.ui.screen.navbarScreens.AddBookScreenVisual
+import com.example.pocketlibrary.ui.screen.AuthScreen
 import com.example.pocketlibrary.ui.screen.BookDetailsScreen
 import com.example.pocketlibrary.ui.screen.EditBookScreenVisual
-import com.example.pocketlibrary.ui.screen.LibraryScreen
-import com.example.pocketlibrary.ui.screen.SearchScreen
+import com.example.pocketlibrary.ui.screen.navbarScreens.LibraryScreen
+import com.example.pocketlibrary.ui.screen.navbarScreens.ProfileScreen
+import com.example.pocketlibrary.ui.screen.navbarScreens.SearchScreen
+import com.example.pocketlibrary.ui.viewmodel.AuthViewModel
 import com.example.pocketlibrary.ui.viewmodel.BookViewModel
 
 @Composable
@@ -32,18 +36,44 @@ fun PocketLibraryNavigation() {
         factory = BookViewModel.Factory(app.bookRepository)
     )
 
+    val authViewModel: AuthViewModel = viewModel()
+
+    val startDestination = if (authViewModel.currentUser != null){
+        Screen.Library.route
+    } else {
+        Screen.Auth.route
+    }
+
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
 
     Scaffold(
         bottomBar = {
-            BottomBar(navController = navController)
+            if (currentRoute != Screen.Auth.route){
+                BottomBar(navController = navController)
+            }
         }
     ) { padding ->
 
         NavHost(
             navController = navController,
-            startDestination = Screen.Library.route,
+            startDestination = startDestination,
             modifier = Modifier.padding(padding)
         ) {
+
+            composable (Screen.Auth.route){
+                AuthScreen(
+                    authViewModel = authViewModel,
+                    onAuthSuccess = {
+                        bookViewModel.syncFromRemote()
+                        navController.navigate(Screen.Library.route){
+                            popUpTo (Screen.Auth.route) {
+                                inclusive = true
+                            }
+                        }
+                    }
+                )
+            }
 
             composable(Screen.Search.route) {
                 SearchScreen(
@@ -80,13 +110,23 @@ fun PocketLibraryNavigation() {
                 )
             }
 
+            composable (Screen.Profile.route) {
+                ProfileScreen(
+                    authViewModel = authViewModel,
+                    onSignedOut = {
+                        navController.navigate(Screen.Auth.route){
+                            popUpTo (0){inclusive = true}
+                        }
+                    }
+                )
+            }
+
             composable (
                 route = Screen.Details.route,
                 arguments = listOf(navArgument("bookId"){
-                    type = NavType.LongType })
+                    type = NavType.StringType })
                 ) { backStackEntry ->
-                // Magic number fallback, better move to a named const for readability.
-                val bookId = backStackEntry.arguments?.getLong("bookId") ?: 0L
+                val bookId = backStackEntry.arguments?.getString("bookId") ?: ""
                 val bookWithTags by bookViewModel.bookFlow(bookId).collectAsState(initial = null)
 
                 bookWithTags?.let { details ->
@@ -101,10 +141,9 @@ fun PocketLibraryNavigation() {
             composable (
                 route = Screen.Edit.route,
                 arguments = listOf(navArgument("bookId"){
-                    type = NavType.LongType })
+                    type = NavType.StringType })
             ) { backStackEntry ->
-                // Magic number fallback, better move to a named const for readability.
-                val bookId = backStackEntry.arguments?.getLong("bookId") ?: 0L
+                val bookId = backStackEntry.arguments?.getString("bookId") ?: ""
                 val bookWithTags by bookViewModel.bookFlow(bookId).collectAsState(initial = null)
 
                 bookWithTags?.let { details ->

@@ -6,34 +6,66 @@ import androidx.lifecycle.viewModelScope
 import com.example.pocketlibrary.data.local.entity.BookEntity
 import com.example.pocketlibrary.data.local.entity.BookWithTags
 import com.example.pocketlibrary.data.repository.BookRepository
+import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
+private const val STOP_TIMEOUT_MS = 5000L
+
+@OptIn(ExperimentalCoroutinesApi::class)
 class BookViewModel (
     private val repository: BookRepository
 ): ViewModel(){
 
-    val books: StateFlow<List<BookWithTags>> = repository
-        .observeBooksWithTags()
+    private val auth = FirebaseAuth.getInstance()
+    private val currentUid = MutableStateFlow(auth.currentUser?.uid)
+
+    private val authListener = FirebaseAuth.AuthStateListener {
+        firebaseAuth ->
+        currentUid.value = firebaseAuth.currentUser?.uid
+    }
+
+    init {
+        auth.addAuthStateListener (authListener)
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        auth.removeAuthStateListener (authListener)
+    }
+
+    private val uid: String?
+        get() = currentUid.value
+
+    val books: StateFlow<List<BookWithTags>> = currentUid
+        .flatMapLatest { uid ->
+            if (uid == null) {
+                flowOf(emptyList())
+            }
+            else {
+                repository.observeBooksWithTags(uid)
+            }
+        }
         .stateIn(
             scope = viewModelScope,
-            // Magic number, better move timeout to a named const.
-            started = SharingStarted.WhileSubscribed(5000),
+            started = SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS),
             initialValue = emptyList()
         )
 
-    // Holds the current text typed in the search bar.
-    // Kept in the ViewModel so the query survives recomposition and screen rotation.
     val searchQuery = MutableStateFlow("")
 
-    // combine merges two flows into one: whenever books or searchQuery changes,
-    // this recalculates and emits a new filtered list — no manual filtering in the UI.
-    val filteredBooks: StateFlow<List<BookWithTags>> = combine(books, searchQuery) { books, query ->
+    val filteredBooks: StateFlow<List<BookWithTags>> = combine(
+        books,
+        searchQuery
+    ) { books, query ->
         if (query.isBlank()) {
             books
         } else {
@@ -45,7 +77,7 @@ class BookViewModel (
         }
     }.stateIn(
         scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
+        started = SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS),
         initialValue = emptyList()
     )
 
@@ -53,29 +85,40 @@ class BookViewModel (
         searchQuery.value = query
     }
 
-    fun bookFlow(bookId: Long): Flow<BookWithTags?> =
-        repository.observeBookWithTags(bookId)
+    fun bookFlow(bookId: String): Flow<BookWithTags?> {
+        val currentUid = uid ?: return flowOf(null)
+        return repository.observeBookWithTags(currentUid, bookId)
+    }
 
     fun addBook(book: BookEntity, tags: List<String>){
+        val currentUid = uid ?: return
         viewModelScope.launch {
-            repository.addBookWithTags(book, tags)
+            repository.addBookWithTags(currentUid, book, tags)
         }
     }
 
-    fun deleteBook(bookId: Long){
+    fun updateBook(book: BookEntity, tags: List<String>){
+        val currentUid = uid ?: return
+        viewModelScope.launch {
+            repository.updateBookWithTags(currentUid, book, tags)
+        }
+    }
+
+    fun deleteBook(bookId: String){
+        val currentUid = uid ?: return
         viewModelScope.launch {
             try{
-                repository.deleteBook(bookId)
+                repository.deleteBook(currentUid, bookId)
             } catch ( e: Exception) {
                 e.printStackTrace()
             }
         }
     }
 
-    //better to wrap with try catch and handle exception in case of failure same as in delete
-    fun updateBook(book: BookEntity, tags: List<String>){
+    fun syncFromRemote() {
+        val currentUid = uid ?: return
         viewModelScope.launch {
-            repository.updateBookWithTags(book, tags)
+            repository.syncFromRemote(currentUid)
         }
     }
 

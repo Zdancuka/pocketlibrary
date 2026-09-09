@@ -1,5 +1,6 @@
 package com.example.pocketlibrary.ui.screen
 
+import android.content.Intent
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
@@ -81,7 +82,7 @@ fun BookFormScreen(
         if (uri != null) {
             context.contentResolver.takePersistableUriPermission(
                 uri,
-                android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION
+                Intent.FLAG_GRANT_READ_URI_PERMISSION
             )
             selectedImageUri = uri
         }

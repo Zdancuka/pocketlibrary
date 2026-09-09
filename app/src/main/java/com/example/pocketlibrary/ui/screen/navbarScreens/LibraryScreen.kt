@@ -1,4 +1,4 @@
-package com.example.pocketlibrary.ui.screen
+package com.example.pocketlibrary.ui.screen.navbarScreens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -56,8 +56,8 @@ fun LibraryScreen(
     ){
         items (books, key ={it.book.bookId}) {bookWithTags ->
             SwipeToDeleteCard(
-                bookWithTags = bookWithTags,
-                bookViewModel = bookViewModel
+                bookTitle = bookWithTags.book.title,
+                onDelete = { bookViewModel.deleteBook(bookWithTags.book.bookId)}
             ) {
                 BookCard(
                     bookWithTags = bookWithTags,

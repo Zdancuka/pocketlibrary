@@ -29,8 +29,8 @@ import com.example.pocketlibrary.ui.viewmodel.BookViewModel
 @OptIn (ExperimentalMaterial3Api::class)
 @Composable
 fun SwipeToDeleteCard(
-    bookWithTags: BookWithTags,
-    bookViewModel: BookViewModel,
+    bookTitle: String,
+    onDelete: () -> Unit,
     content: @Composable () -> Unit
 ){
     var showDeleteDialog by remember { mutableStateOf(false) }
@@ -46,10 +46,10 @@ fun SwipeToDeleteCard(
 
     if (showDeleteDialog) {
         DeleteBookDialog(
-            bookTitle = bookWithTags.book.title,
+            bookTitle = bookTitle,
             onConfirm = {
                 showDeleteDialog = false
-                bookViewModel.deleteBook(bookWithTags.book.bookId)
+                onDelete()
             },
             onDismiss = { showDeleteDialog = false}
         )

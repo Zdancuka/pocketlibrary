@@ -6,11 +6,14 @@ sealed class Screen(val route: String) {
     data object Library : Screen("library")
     data object AddBook : Screen("add_book")
 
+    data object Profile : Screen ("profile")
+    data object Auth: Screen("auth")
+
     object Details : Screen("book_details/{bookId}") {
-        fun createRoute(bookId: Long) = "book_details/$bookId"
+        fun createRoute(bookId: String) = "book_details/$bookId"
     }
 
     object Edit : Screen("edit_book/{bookId}") {
-        fun createRoute(bookId: Long) = "edit_book/$bookId"
+        fun createRoute(bookId: String) = "edit_book/$bookId"
     }
 }

@@ -1,32 +1,170 @@
 package com.example.pocketlibrary.data.repository
 
-import androidx.compose.ui.text.resolveDefaults
 import androidx.room.withTransaction
-import com.example.pocketlibrary.data.local.dao.BookDao
 import com.example.pocketlibrary.data.local.database.PocketLibraryDatabase
 import com.example.pocketlibrary.data.local.entity.BookEntity
 import com.example.pocketlibrary.data.local.entity.BookTagCrossRef
 import com.example.pocketlibrary.data.local.entity.TagEntity
+import com.example.pocketlibrary.data.remote.BookDto
+import com.example.pocketlibrary.data.remote.BookRemoteDataSource
 
 class BookRepository(
-    private val database: PocketLibraryDatabase
+    private val database : PocketLibraryDatabase ,
+    private val remoteDataSource : BookRemoteDataSource
 ) {
 
-    fun observeBookWithTags(bookId: Long)= database.bookDao().observeBookWithTags(bookId)
-    fun observeBooksWithTags()= database.bookDao().observeBooksWithTags()
+    fun observeBookWithTags(
+        uid : String ,
+        bookId : String
+    ) = database.bookDao().observeBookWithTags(uid , bookId)
 
-    suspend fun deleteBook(bookId: Long){
-        database.bookDao().deleteBookAndRef(bookId)
+    fun observeBooksWithTags(
+        uid : String
+    ) = database.bookDao().observeBooksWithTags(uid)
+
+    suspend fun deleteBook(
+        uid : String ,
+        bookId : String
+    ) {
+        database.bookDao().deleteBookAndRef(uid , bookId)
+        runCatching {
+            remoteDataSource.markBookDeleted(
+                uid , bookId , System.currentTimeMillis()
+            )
+        }.onFailure { e ->
+            android.util.Log.e("BookRepository" , "markBook failed" , e)
+        }
     }
 
     suspend fun addBookWithTags(
-        book: BookEntity,
-        tags: List<String>
-    ): Long = database.withTransaction {
+        uid : String ,
+        book : BookEntity ,
+        tags : List<String>
+    ) {
+        val stamped = book.copy(uid = uid)
 
-        val bookId = database.bookDao().insertBook(book)
+        database.withTransaction {
+            database.bookDao().insertBook(stamped)
+            val tagIds = resolveTagIds(tags)
 
-        val tagIds = tags
+            database.bookTagDao().insertAll(
+                tagIds.map { tagId ->
+                    BookTagCrossRef(bookId = stamped.bookId , tagId = tagId)
+                }
+            )
+        }
+        pushToRemote(uid , stamped , tags)
+    }
+
+    suspend fun updateBookWithTags(
+        uid : String ,
+        book : BookEntity ,
+        tags : List<String>
+    ) {
+
+        val updated = book.copy(uid = uid , updatedAt = System.currentTimeMillis())
+
+        database.withTransaction {
+            database.bookDao().updateBook(updated)
+            database.bookTagDao().deleteCrossRefsForBook(updated.bookId)
+
+            val tagIds = resolveTagIds(tags)
+            database.bookTagDao().insertAll(
+                tagIds.map { tagId ->
+                    BookTagCrossRef(
+                        bookId = updated.bookId ,
+                        tagId = tagId
+                    )
+                }
+            )
+        }
+        pushToRemote(uid , updated , tags)
+    }
+
+    suspend fun syncFromRemote(uid : String) {
+        // this sync only adds or updates books from the remote.
+        // It does NOT delete books that were removed on another device.
+        // Example: user deletes a book on phone A → it is removed from Firestore.
+        // When phone B syncs, that book is simply not in the remote list, so this
+        // loop never sees it and it stays in phone B's local database forever.
+        // To fix this, after upserting remote books, compare local IDs against
+        // remote IDs and delete any local book whose ID is no longer in the remote list.
+        val remoteBooks = runCatching {
+            remoteDataSource.fetchAllBooks(uid)
+        }.onFailure { e-> android.util.Log.e(
+            "BookRepository",
+            "syncToRemote failed" ,
+            e
+        ) } .getOrNull() ?: return
+
+        for (dto in remoteBooks) {
+            val local = database.bookDao().getBookOnce(dto.bookId)
+
+            if (dto.isDeleted) {
+                if (local != null) {
+                    database.bookDao().deleteBookAndRef(uid , dto.bookId)
+                }
+                continue
+            }
+
+            if (local == null || dto.updatedAt > local.updatedAt) {
+                val entity = BookEntity(
+                    bookId = dto.bookId ,
+                    uid = uid ,
+                    title = dto.title ,
+                    author = dto.author ,
+                    language = dto.language ,
+                    pageNumber = dto.pageNumber ,
+                    bookDescription = dto.bookDescription ,
+                    bookNotes = dto.bookNotes ,
+                    imageUri = dto.imageUri ,
+                    updatedAt = dto.updatedAt
+                )
+                database.withTransaction {
+                    if (local == null) database.bookDao().insertBook(entity)
+                    else database.bookDao().updateBook(entity)
+
+                    database.bookTagDao().deleteCrossRefsForBook(entity.bookId)
+                    val tagIds = resolveTagIds(dto.tags)
+                    database.bookTagDao().insertAll(
+                        tagIds.map { tagId ->
+                            BookTagCrossRef(
+                                bookId = entity.bookId ,
+                                tagId = tagId
+                            )
+                        }
+                    )
+                }
+            }
+        }
+    }
+
+    private suspend fun pushToRemote(uid : String , book : BookEntity , tag : List<String>) {
+        runCatching {
+            remoteDataSource.pushBook(
+                uid ,
+                BookDto(
+                    bookId = book.bookId ,
+                    title = book.title ,
+                    author = book.author ,
+                    language = book.language ,
+                    pageNumber = book.pageNumber ,
+                    bookDescription = book.bookDescription ,
+                    bookNotes = book.bookNotes ,
+                    imageUri = book.imageUri ,
+                    updatedAt = book.updatedAt ,
+                    tags = tag
+                )
+            )
+        }.onFailure { e -> android.util.Log.e(
+            "BookRepository" ,
+            "pushToRemote failed" ,
+            e)
+        }
+    }
+
+    private suspend fun resolveTagIds(tags : List<String>) : List<Long> =
+        tags
             .map { it.trim() }
             .filter { it.isNotBlank() }
             .distinct()
@@ -36,52 +174,7 @@ class BookRepository(
                     existing.tagId
                 } else {
                     val newId = database.tagDao().insert(TagEntity(name = tagName))
-                    // `!!` can crash app; safer next step is handling null explicitly and returning a clear failure.
-                    // Try to avoid !! usage where it is possible
-                    if (newId != -1L) newId else database.tagDao().findByName(tagName)!!.tagId
-                }
-            }
-
-        database.bookTagDao().insertAll(
-            tagIds.map { tagId ->
-                BookTagCrossRef(bookId = bookId, tagId = tagId)
-            }
-        )
-
-        bookId
-
-    }
-
-    suspend fun updateBookWithTags(
-        book: BookEntity,
-        tags: List<String>
-    ) = database.withTransaction {
-
-        database.bookDao().updateBook(book)
-        database.bookTagDao().deleteCrossRefsForBook(book.bookId)
-
-        val tagIds = resolveTagIds(tags)
-
-        database.bookTagDao().insertAll(
-            tagIds.map {tagId -> BookTagCrossRef(
-                bookId = book.bookId,
-                tagId = tagId
-            )}
-        )
-    }
-
-    private suspend fun resolveTagIds(tags: List<String>): List<Long> =
-        tags
-            .map {it.trim()}
-            .filter { it.isNotBlank() }
-            .distinct()
-            .map { tagName ->
-                val existing = database.tagDao().findByName(tagName)
-                if (existing != null){
-                    existing.tagId
-                } else {
-                    val newId = database.tagDao().insert(TagEntity(name= tagName))
-                    if (newId != -1L) newId else database.tagDao().findByName(tagName)!!.tagId
+                    if (newId != - 1L) newId else database.tagDao().findByName(tagName) !!.tagId
                 }
 
             }
