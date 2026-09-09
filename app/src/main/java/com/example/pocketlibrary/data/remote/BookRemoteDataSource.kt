@@ -18,11 +18,15 @@ class BookRemoteDataSource(
             .set(book).await()
     }
 
-
-    suspend fun deleteBook(uid: String, bookId: String){
+    suspend fun markBookDeleted(uid: String, bookId: String, deletedAt: Long){
         booksCollection(uid)
             .document(bookId)
-            .delete().await()
+            .update(
+                mapOf(
+                    "isDeleted" to true,
+                    "updatedAt" to deletedAt
+                )
+            ).await()
     }
 
     suspend fun fetchAllBooks(uid: String): List<BookDto>{

@@ -4,66 +4,74 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException
 import com.google.firebase.auth.FirebaseUser
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
-class AuthViewModel: ViewModel(){
+
+sealed class AuthState {
+    data object Idle : AuthState()
+    data object Loading : AuthState()
+    data class Error(val message : String) : AuthState()
+}
+
+class AuthViewModel : ViewModel() {
     private val auth = FirebaseAuth.getInstance()
 
     var isLoading by mutableStateOf(false)
         private set
 
-    var errorMessage by mutableStateOf <String?>(null)
+    var errorMessage by mutableStateOf<String?>(null)
         private set
 
-    val currentUser: FirebaseUser?
-        get()= auth.currentUser
+    val currentUser : FirebaseUser?
+        get() = auth.currentUser
 
     fun signUp(
         email : String ,
         password : String ,
         onSuccess : () -> Unit
     ) {
-
-        isLoading = true
-        errorMessage = null
-
-        auth.createUserWithEmailAndPassword(email , password)
-            .addOnSuccessListener {
+        viewModelScope.launch {
+            isLoading = true
+            errorMessage = null
+            try {
+                auth.createUserWithEmailAndPassword(email , password).await()
                 isLoading = false
                 onSuccess()
-            }
-            .addOnFailureListener { e ->
+            } catch (e : Exception) {
                 isLoading = false
                 errorMessage = mapFirebaseError(e)
             }
+        }
     }
 
 
     fun signIn(
-        email: String,
-        password: String,
-        onSuccess: () -> Unit
+        email : String ,
+        password : String ,
+        onSuccess : () -> Unit
     ) {
-
-        isLoading = true
-        errorMessage = null
-
-        auth.signInWithEmailAndPassword(email , password)
-            .addOnSuccessListener {
+        viewModelScope.launch {
+            isLoading = true
+            errorMessage = null
+            try {
+                auth.signInWithEmailAndPassword(email , password).await()
                 isLoading = false
                 onSuccess()
-            }
-            .addOnFailureListener { e ->
+            } catch (e : Exception) {
                 isLoading = false
                 errorMessage = mapFirebaseError(e)
             }
+        }
     }
 
-    fun signOut(){
+    fun signOut() {
         auth.signOut()
     }
 
