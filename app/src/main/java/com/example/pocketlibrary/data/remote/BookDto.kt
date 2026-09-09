@@ -1,6 +1,6 @@
 package com.example.pocketlibrary.data.remote
 
-data class BookDto @JvmOverloads constructor(
+data class BookDto (
     val bookId: String = "",
     val title: String = "",
     val author: String = "",
