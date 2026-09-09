@@ -1,37 +1,45 @@
 package com.example.pocketlibrary.data.repository
 
-import androidx.compose.ui.text.resolveDefaults
 import androidx.room.withTransaction
-import com.example.pocketlibrary.data.local.dao.BookDao
 import com.example.pocketlibrary.data.local.database.PocketLibraryDatabase
 import com.example.pocketlibrary.data.local.entity.BookEntity
 import com.example.pocketlibrary.data.local.entity.BookTagCrossRef
 import com.example.pocketlibrary.data.local.entity.TagEntity
 import com.example.pocketlibrary.data.remote.BookDto
 import com.example.pocketlibrary.data.remote.BookRemoteDataSource
-import kotlin.String
 
 class BookRepository(
-    private val database: PocketLibraryDatabase,
-    private val remoteDataSource: BookRemoteDataSource
+    private val database : PocketLibraryDatabase ,
+    private val remoteDataSource : BookRemoteDataSource
 ) {
 
     fun observeBookWithTags(
-        uid: String,
-        bookId: String
-    ) = database.bookDao().observeBookWithTags(uid, bookId)
+        uid : String ,
+        bookId : String
+    ) = database.bookDao().observeBookWithTags(uid , bookId)
+
     fun observeBooksWithTags(
-        uid: String
+        uid : String
     ) = database.bookDao().observeBooksWithTags(uid)
 
-    suspend fun deleteBook(uid: String, bookId: String){
-        database.bookDao().deleteBookAndRef(uid, bookId)
+    suspend fun deleteBook(
+        uid : String ,
+        bookId : String
+    ) {
+        database.bookDao().deleteBookAndRef(uid , bookId)
+        runCatching {
+            remoteDataSource.markBookDeleted(
+                uid , bookId , System.currentTimeMillis()
+            )
+        }.onFailure { e ->
+            android.util.Log.e("BookRepository" , "markBook failed" , e)
+        }
     }
 
     suspend fun addBookWithTags(
-        uid: String,
-        book: BookEntity,
-        tags: List<String>
+        uid : String ,
+        book : BookEntity ,
+        tags : List<String>
     ) {
         val stamped = book.copy(uid = uid)
 
@@ -41,36 +49,39 @@ class BookRepository(
 
             database.bookTagDao().insertAll(
                 tagIds.map { tagId ->
-                    BookTagCrossRef(bookId = stamped.bookId, tagId = tagId)
+                    BookTagCrossRef(bookId = stamped.bookId , tagId = tagId)
                 }
             )
         }
-        pushToRemote(uid, stamped, tags)
+        pushToRemote(uid , stamped , tags)
     }
 
     suspend fun updateBookWithTags(
-        uid: String,
-        book: BookEntity,
-        tags: List<String>
+        uid : String ,
+        book : BookEntity ,
+        tags : List<String>
     ) {
 
-        val updated = book.copy(uid= uid, updatedAt = System.currentTimeMillis())
+        val updated = book.copy(uid = uid , updatedAt = System.currentTimeMillis())
 
         database.withTransaction {
             database.bookDao().updateBook(updated)
             database.bookTagDao().deleteCrossRefsForBook(updated.bookId)
 
             val tagIds = resolveTagIds(tags)
-            database.bookTagDao().insertAll (
-                tagIds.map {tagId -> BookTagCrossRef(
-                bookId = updated.bookId,
-                tagId = tagId) }
+            database.bookTagDao().insertAll(
+                tagIds.map { tagId ->
+                    BookTagCrossRef(
+                        bookId = updated.bookId ,
+                        tagId = tagId
+                    )
+                }
             )
         }
-        pushToRemote(uid, updated, tags)
+        pushToRemote(uid , updated , tags)
     }
 
-    suspend fun syncFromRemote(uid: String){
+    suspend fun syncFromRemote(uid : String) {
         // this sync only adds or updates books from the remote.
         // It does NOT delete books that were removed on another device.
         // Example: user deletes a book on phone A → it is removed from Firestore.
@@ -78,21 +89,35 @@ class BookRepository(
         // loop never sees it and it stays in phone B's local database forever.
         // To fix this, after upserting remote books, compare local IDs against
         // remote IDs and delete any local book whose ID is no longer in the remote list.
-        val remoteBooks = runCatching { remoteDataSource.fetchAllBooks(uid) }.getOrNull() ?: return
+        val remoteBooks = runCatching {
+            remoteDataSource.fetchAllBooks(uid)
+        }.onFailure { e-> android.util.Log.e(
+            "BookRepository",
+            "syncToRemote failed" ,
+            e
+        ) } .getOrNull() ?: return
 
-        for (dto in remoteBooks){
+        for (dto in remoteBooks) {
             val local = database.bookDao().getBookOnce(dto.bookId)
-            if (local == null || dto.updatedAt > local.updatedAt){
+
+            if (dto.isDeleted) {
+                if (local != null) {
+                    database.bookDao().deleteBookAndRef(uid , dto.bookId)
+                }
+                continue
+            }
+
+            if (local == null || dto.updatedAt > local.updatedAt) {
                 val entity = BookEntity(
-                    bookId = dto.bookId,
-                    uid = uid,
-                    title = dto.title,
-                    author = dto.author,
-                    language = dto.language,
-                    pageNumber= dto.pageNumber,
-                    bookDescription = dto.bookDescription,
-                    bookNotes = dto.bookNotes,
-                    imageUri = dto.imageUri,
+                    bookId = dto.bookId ,
+                    uid = uid ,
+                    title = dto.title ,
+                    author = dto.author ,
+                    language = dto.language ,
+                    pageNumber = dto.pageNumber ,
+                    bookDescription = dto.bookDescription ,
+                    bookNotes = dto.bookNotes ,
+                    imageUri = dto.imageUri ,
                     updatedAt = dto.updatedAt
                 )
                 database.withTransaction {
@@ -102,10 +127,10 @@ class BookRepository(
                     database.bookTagDao().deleteCrossRefsForBook(entity.bookId)
                     val tagIds = resolveTagIds(dto.tags)
                     database.bookTagDao().insertAll(
-                        tagIds.map {
-                            tagId -> BookTagCrossRef(
-                            bookId = entity.bookId,
-                            tagId = tagId
+                        tagIds.map { tagId ->
+                            BookTagCrossRef(
+                                bookId = entity.bookId ,
+                                tagId = tagId
                             )
                         }
                     )
@@ -114,38 +139,42 @@ class BookRepository(
         }
     }
 
-    private suspend fun pushToRemote(uid: String,book: BookEntity, tag: List<String>){
+    private suspend fun pushToRemote(uid : String , book : BookEntity , tag : List<String>) {
         runCatching {
             remoteDataSource.pushBook(
-                uid,
+                uid ,
                 BookDto(
-                    bookId = book.bookId,
-                    title = book.title,
-                    author = book.author,
-                    language = book.language,
-                    pageNumber= book.pageNumber,
-                    bookDescription = book.bookDescription,
-                    bookNotes = book.bookNotes,
-                    imageUri = book.imageUri,
-                    updatedAt = book.updatedAt,
+                    bookId = book.bookId ,
+                    title = book.title ,
+                    author = book.author ,
+                    language = book.language ,
+                    pageNumber = book.pageNumber ,
+                    bookDescription = book.bookDescription ,
+                    bookNotes = book.bookNotes ,
+                    imageUri = book.imageUri ,
+                    updatedAt = book.updatedAt ,
                     tags = tag
                 )
             )
-        }.onFailure { e -> android.util.Log.e("BookRepository", "pushToRemote failed", e) }
+        }.onFailure { e -> android.util.Log.e(
+            "BookRepository" ,
+            "pushToRemote failed" ,
+            e)
+        }
     }
 
-    private suspend fun resolveTagIds(tags: List<String>): List<Long> =
+    private suspend fun resolveTagIds(tags : List<String>) : List<Long> =
         tags
-            .map {it.trim()}
+            .map { it.trim() }
             .filter { it.isNotBlank() }
             .distinct()
             .map { tagName ->
                 val existing = database.tagDao().findByName(tagName)
-                if (existing != null){
+                if (existing != null) {
                     existing.tagId
                 } else {
-                    val newId = database.tagDao().insert(TagEntity(name= tagName))
-                    if (newId != -1L) newId else database.tagDao().findByName(tagName)!!.tagId
+                    val newId = database.tagDao().insert(TagEntity(name = tagName))
+                    if (newId != - 1L) newId else database.tagDao().findByName(tagName) !!.tagId
                 }
 
             }
