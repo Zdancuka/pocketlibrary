@@ -23,7 +23,7 @@ class BookRemoteDataSource(
             .document(bookId)
             .update(
                 mapOf(
-                    "isDeleted" to true,
+                    "deleted" to true,
                     "updatedAt" to deletedAt
                 )
             ).await()
