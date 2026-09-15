@@ -26,6 +26,9 @@ interface BookDao {
     @Query("SELECT * FROM books WHERE uid = :uid AND bookId = :bookId LIMIT 1")
     fun observeBookWithTags(uid: String, bookId: String): Flow<BookWithTags?>
 
+    // I see it is unused method but still to keep code clean even it unused it should be properly
+    // implemented. Currently it missing the @Transaction annotation which is required for Room
+    // to handle the relationship properly.
     @Query ("SELECT * FROM books WHERE uid = :uid")
     suspend fun getAllBookOnce (uid: String): List<BookWithTags>
 

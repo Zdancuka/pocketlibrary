@@ -89,11 +89,17 @@ fun AuthScreen(
         Spacer(modifier = Modifier.height(Dimens.SpaceMedium))
 
         // Password field
+        // Why removed inline error validation?
+        // The button will not be enabled if the password is invalid, but user may not know why the button is disabled.
+        // So we will show the error message when the user touched the password field.
+        //fix quite simple added below
         PasswordField(
             label = stringResource(R.string.auth_password),
             value = password,
             onValueChange = { password = it },
             placeholder = stringResource(R.string.auth_password),
+            isError = passwordTouched && isSignUpMode && isPasswordValid.not(),
+            errorText = stringResource(R.string.auth_error_weak_password)
         )
 
 

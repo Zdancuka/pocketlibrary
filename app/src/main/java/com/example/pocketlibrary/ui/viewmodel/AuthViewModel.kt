@@ -57,16 +57,20 @@ class AuthViewModel : ViewModel() {
         password : String ,
         onSuccess : () -> Unit
     ) {
+        // If we need to pass isLoading = false in both scenarios, we can use a finally block
         viewModelScope.launch {
             isLoading = true
             errorMessage = null
             try {
                 auth.signInWithEmailAndPassword(email , password).await()
-                isLoading = false
+                //isLoading = false
                 onSuccess()
             } catch (e : Exception) {
-                isLoading = false
+                //isLoading = false
                 errorMessage = mapFirebaseError(e)
+            }
+            finally {
+                isLoading = false
             }
         }
     }

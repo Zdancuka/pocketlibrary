@@ -36,7 +36,7 @@ fun PasswordField(
     onValueChange : (String) -> Unit ,
     placeholder : String ,
     modifier : Modifier = Modifier ,
-    keyboardType : KeyboardType = KeyboardType.Password ,
+    keyboardType : KeyboardType = KeyboardType.Password , // unused parameter, try to make code clean.
     isError : Boolean = false ,
     errorText : String? = null ,
 ) {
