@@ -7,9 +7,11 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -20,17 +22,20 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,6 +43,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -46,24 +52,31 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.core.net.toUri
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.pocketlibrary.R
 import com.example.pocketlibrary.data.local.entity.BookEntity
 import com.example.pocketlibrary.data.local.entity.BookWithTags
+import com.example.pocketlibrary.data.remote.openlibrary.OpenLibraryDoc
+import com.example.pocketlibrary.data.remote.openlibrary.authorDisplay
+import com.example.pocketlibrary.data.remote.openlibrary.coverUrl
 import com.example.pocketlibrary.ui.screen.element.BookFormHeader
 import com.example.pocketlibrary.ui.screen.element.LabeledField
 import com.example.pocketlibrary.ui.screen.element.LabeledMultilineField
+import com.example.pocketlibrary.ui.screen.element.OpenLibraryResultRow
 import com.example.pocketlibrary.ui.theme.Dimens
+import com.example.pocketlibrary.ui.viewmodel.OpenLibrarySearchViewModel
 
 
 @Composable
 fun BookFormScreen(
-    bookWithTags: BookWithTags?,
-    screenTitle: String,
-    saveButtonText: String,
-    onSave: (BookEntity, List<String>) -> Unit
+    bookWithTags : BookWithTags? ,
+    screenTitle : String ,
+    saveButtonText : String ,
+    onSave : (BookEntity , List<String>) -> Unit
 ) {
     val context = LocalContext.current
-    val existingBook= bookWithTags?.book
+    val existingBook = bookWithTags?.book
+    val isAddMode = bookWithTags == null
 
     var title by remember { mutableStateOf(existingBook?.title ?: "") }
     var author by remember { mutableStateOf(existingBook?.author ?: "") }
@@ -75,13 +88,24 @@ fun BookFormScreen(
     var tags by remember { mutableStateOf(bookWithTags?.tags?.map { it.name } ?: emptyList()) }
     var selectedImageUri by remember { mutableStateOf<Uri?>(existingBook?.imageUri?.toUri()) }
 
+    val openLibraryViewMode : OpenLibrarySearchViewModel = viewModel()
+    val searchQuery by openLibraryViewMode.query.collectAsState()
+    val searchResults by openLibraryViewMode.results.collectAsState()
+    val isSearching by openLibraryViewMode.isSearching.collectAsState()
+
+    fun applyOpenLibraryPick(doc : OpenLibraryDoc) {
+        title = doc.title
+        author = doc.authorDisplay()
+        doc.coverUrl()?.let { selectedImageUri = it.toUri() }
+        openLibraryViewMode.clearResult()
+    }
 
     val imagePickerLaunch = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia()
     ) { uri ->
         if (uri != null) {
             context.contentResolver.takePersistableUriPermission(
-                uri,
+                uri ,
                 Intent.FLAG_GRANT_READ_URI_PERMISSION
             )
             selectedImageUri = uri
@@ -90,7 +114,7 @@ fun BookFormScreen(
 
     fun addCurrentTag() {
         val trimmed = tagInput.trim()
-        if (trimmed.isNotEmpty() && !tags.contains(trimmed)) {
+        if (trimmed.isNotEmpty() && ! tags.contains(trimmed)) {
             tags += trimmed
         }
         tagInput = ""
@@ -101,17 +125,17 @@ fun BookFormScreen(
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.surfaceVariant),
+            .background(MaterialTheme.colorScheme.surfaceVariant) ,
         contentPadding = PaddingValues(
-            horizontal = Dimens.SpaceXLarge,
+            horizontal = Dimens.SpaceXLarge ,
             vertical = Dimens.SpaceLarge
-        ),
+        ) ,
         verticalArrangement = Arrangement.spacedBy(Dimens.SpaceLarge)
     ) {
         item {
             BookFormHeader(
-                screenTitle = screenTitle,
-                selectedImageUri = selectedImageUri,
+                screenTitle = screenTitle ,
+                selectedImageUri = selectedImageUri ,
                 onImageClick = {
                     imagePickerLaunch.launch(
                         PickVisualMediaRequest(
@@ -122,21 +146,76 @@ fun BookFormScreen(
             )
         }
 
+        if (isAddMode) {
+            item {
+                Column(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(Dimens.CornerXSmall))
+                        .border(
+                            Dimens.BorderThin ,
+                            MaterialTheme.colorScheme.secondary
+                        )
+                        .padding(Dimens.SpaceSmall)
+                        .background(MaterialTheme.colorScheme.background)
+                ) {
+                    Text(
+                        text = stringResource(R.string.search_online) ,
+                        fontWeight = FontWeight.SemiBold ,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+
+
+                    TextField(
+                        value = searchQuery ,
+                        onValueChange = { openLibraryViewMode.onQueryChange(it) } ,
+                        placeholder = { Text(stringResource(R.string.search_by_title_or_author)) } ,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(Dimens.CornerXSmall)) ,
+                        singleLine = true ,
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search) ,
+                        colors = TextFieldDefaults.colors(
+                            unfocusedContainerColor = MaterialTheme.colorScheme.surface ,
+                            focusedContainerColor = MaterialTheme.colorScheme.surface ,
+                            unfocusedIndicatorColor = Color.Transparent ,
+                            focusedIndicatorColor = Color.Transparent
+                        )
+                    )
+
+
+                    if (isSearching) {
+                        Box(
+                            modifier = Modifier.fillMaxWidth() ,
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator()
+                        }
+                    }
+
+                    searchResults.forEach { doc ->
+                        OpenLibraryResultRow(
+                            doc = doc ,
+                            onClick = { applyOpenLibraryPick(doc) }
+                            )
+                    }
+                }
+            }
+        }
 
         item {
             LabeledField(
-                label = stringResource(R.string.title),
-                value = title,
-                onValueChange = { title = it },
+                label = stringResource(R.string.title) ,
+                value = title ,
+                onValueChange = { title = it } ,
                 placeholder = stringResource(R.string.enter_title)
             )
         }
 
         item {
             LabeledField(
-                label = stringResource(R.string.author),
-                value = author,
-                onValueChange = { author = it },
+                label = stringResource(R.string.author) ,
+                value = author ,
+                onValueChange = { author = it } ,
                 placeholder = stringResource(R.string.enter_author)
             )
         }
@@ -145,20 +224,20 @@ fun BookFormScreen(
             Row(horizontalArrangement = Arrangement.spacedBy(Dimens.SpaceMedium)) {
                 Box(modifier = Modifier.weight(1f)) {
                     LabeledField(
-                        label = stringResource(R.string.total_pages),
-                        value = pageCountText,
+                        label = stringResource(R.string.total_pages) ,
+                        value = pageCountText ,
                         onValueChange = { new ->
                             if (new.all { it.isDigit() }) pageCountText = new
-                        },
-                        placeholder = stringResource(R.string.enter_page_number),
+                        } ,
+                        placeholder = stringResource(R.string.enter_page_number) ,
                         keyboardType = KeyboardType.Number
                     )
                 }
                 Box(modifier = Modifier.weight(1f)) {
                     LabeledField(
-                        label = stringResource(R.string.language),
-                        value = language,
-                        onValueChange = { language = it },
+                        label = stringResource(R.string.language) ,
+                        value = language ,
+                        onValueChange = { language = it } ,
                         placeholder = stringResource(R.string.enter_language)
                     )
                 }
@@ -167,9 +246,9 @@ fun BookFormScreen(
 
         item {
             LabeledMultilineField(
-                label = stringResource(R.string.description),
-                value = description,
-                onValueChange = { description = it },
+                label = stringResource(R.string.description) ,
+                value = description ,
+                onValueChange = { description = it } ,
                 placeholder = stringResource(R.string.enter_description)
             )
         }
@@ -181,15 +260,15 @@ fun BookFormScreen(
             ) {
 
                 Image(
-                    painter = painterResource(R.drawable.ic_tag),
-                    contentDescription = null,
+                    painter = painterResource(R.drawable.ic_tag) ,
+                    contentDescription = null ,
                 )
 
                 Spacer(modifier = Modifier.width(Dimens.SpaceSmall))
 
                 Text(
-                    text = stringResource(R.string.add_tags),
-                    fontWeight = FontWeight.SemiBold,
+                    text = stringResource(R.string.add_tags) ,
+                    fontWeight = FontWeight.SemiBold ,
                     color = MaterialTheme.colorScheme.onSurface
                 )
             }
@@ -197,19 +276,19 @@ fun BookFormScreen(
 
         item {
             TextField(
-                value = tagInput,
-                onValueChange = { tagInput = it },
-                placeholder = { Text(stringResource(R.string.add_tags)) },
+                value = tagInput ,
+                onValueChange = { tagInput = it } ,
+                placeholder = { Text(stringResource(R.string.add_tags)) } ,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(Dimens.CornerXSmall)),
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                keyboardActions = KeyboardActions(onDone = { addCurrentTag() }),
+                    .clip(RoundedCornerShape(Dimens.CornerXSmall)) ,
+                singleLine = true ,
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done) ,
+                keyboardActions = KeyboardActions(onDone = { addCurrentTag() }) ,
                 colors = TextFieldDefaults.colors(
-                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                    focusedContainerColor = MaterialTheme.colorScheme.surface,
-                    unfocusedIndicatorColor = Color.Transparent,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surface ,
+                    focusedContainerColor = MaterialTheme.colorScheme.surface ,
+                    unfocusedIndicatorColor = Color.Transparent ,
                     focusedIndicatorColor = Color.Transparent
                 )
             )
@@ -217,30 +296,30 @@ fun BookFormScreen(
 
         item {
             FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(Dimens.SpaceSmall),
+                horizontalArrangement = Arrangement.spacedBy(Dimens.SpaceSmall) ,
                 verticalArrangement = Arrangement.spacedBy(Dimens.SpaceSmall)
             ) {
                 tags.forEach { tag ->
                     Surface(
-                        color = MaterialTheme.colorScheme.primaryContainer,
+                        color = MaterialTheme.colorScheme.primaryContainer ,
                         shape = RoundedCornerShape(Dimens.CornerPill)
                     ) {
                         Row(
                             modifier = Modifier.padding(
-                                horizontal = Dimens.SpaceSmall,
+                                horizontal = Dimens.SpaceSmall ,
                                 vertical = Dimens.SpaceXXSmall
-                            ),
+                            ) ,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "#$tag",
-                                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                text = "#$tag" ,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer ,
                                 style = MaterialTheme.typography.bodyMedium
                             )
                             Spacer(modifier = Modifier.width(Dimens.SpaceXXSmall))
                             Text(
-                                text = "×",
-                                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                text = "×" ,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer ,
                                 modifier = Modifier.clickable { tags = tags - tag }
                             )
                         }
@@ -251,48 +330,48 @@ fun BookFormScreen(
 
         item {
             LabeledMultilineField(
-                label = stringResource(R.string.notes),
-                value = notes,
-                onValueChange = { notes = it },
+                label = stringResource(R.string.notes) ,
+                value = notes ,
+                onValueChange = { notes = it } ,
                 placeholder = stringResource(R.string.enter_notes)
             )
         }
 
         item {
-            Button (
+            Button(
                 onClick = {
                     val pageCount = pageCountText.toIntOrNull()
                     val bookToSave = existingBook?.copy(
-                            title = title,
-                            author = author,
-                            language = language,
-                            pageNumber = pageCount,
-                            bookDescription = description,
-                            bookNotes = notes,
-                            imageUri = selectedImageUri?.toString()
-                        ) ?: BookEntity(
-                        title = title,
-                        author = author,
-                        language = language,
-                        pageNumber = pageCount,
-                        bookDescription = description,
-                        bookNotes = notes,
+                        title = title ,
+                        author = author ,
+                        language = language ,
+                        pageNumber = pageCount ,
+                        bookDescription = description ,
+                        bookNotes = notes ,
                         imageUri = selectedImageUri?.toString()
-                        )
-                    onSave(bookToSave, tags)
-                },
-                enabled = canSave,
+                    ) ?: BookEntity(
+                        title = title ,
+                        author = author ,
+                        language = language ,
+                        pageNumber = pageCount ,
+                        bookDescription = description ,
+                        bookNotes = notes ,
+                        imageUri = selectedImageUri?.toString()
+                    )
+                    onSave(bookToSave , tags)
+                } ,
+                enabled = canSave ,
                 modifier = Modifier
-                    .fillMaxWidth(),
+                    .fillMaxWidth() ,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
+                    containerColor = MaterialTheme.colorScheme.primary ,
                     contentColor = MaterialTheme.colorScheme.onPrimary
-                ),
+                ) ,
                 shape = RoundedCornerShape(Dimens.CornerXSmall)
             ) {
                 Text(
-                    text = saveButtonText,
-                    fontWeight = FontWeight.Bold,
+                    text = saveButtonText ,
+                    fontWeight = FontWeight.Bold ,
                 )
             }
         }

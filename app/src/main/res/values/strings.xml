@@ -66,4 +66,7 @@
 
     <string name="show_password">Show password</string>
     <string name="hide_password">Hide password</string>
+
+    <string name="search_online">Search online</string>
+    <string name="search_by_title_or_author">Search by title or author</string>
 </resources>
