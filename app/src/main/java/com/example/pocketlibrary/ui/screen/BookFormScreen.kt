@@ -150,13 +150,15 @@ fun BookFormScreen(
             item {
                 Column(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(Dimens.CornerXSmall))
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(Dimens.CornerSmall))
                         .border(
                             Dimens.BorderThin ,
-                            MaterialTheme.colorScheme.secondary
+                            MaterialTheme.colorScheme.secondary,
+                            RoundedCornerShape(Dimens.CornerSmall)
                         )
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
                         .padding(Dimens.SpaceSmall)
-                        .background(MaterialTheme.colorScheme.background)
                 ) {
                     Text(
                         text = stringResource(R.string.search_online) ,
@@ -164,6 +166,7 @@ fun BookFormScreen(
                         color = MaterialTheme.colorScheme.onSurface
                     )
 
+                    Spacer(modifier = Modifier.height(Dimens.SpaceXXSmall))
 
                     TextField(
                         value = searchQuery ,
@@ -182,6 +185,7 @@ fun BookFormScreen(
                         )
                     )
 
+                    Spacer(modifier = Modifier.height(Dimens.SpaceXSmall))
 
                     if (isSearching) {
                         Box(
@@ -193,10 +197,12 @@ fun BookFormScreen(
                     }
 
                     searchResults.forEach { doc ->
+                        Spacer(modifier = Modifier.height(Dimens.SpaceXXSmall))
                         OpenLibraryResultRow(
                             doc = doc ,
                             onClick = { applyOpenLibraryPick(doc) }
                             )
+                        Spacer(modifier = Modifier.height(Dimens.SpaceXSmall))
                     }
                 }
             }
