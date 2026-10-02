@@ -1,7 +1,6 @@
 package com.example.pocketlibrary
 
 import android.app.Application
-import android.content.res.Configuration
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
@@ -38,6 +37,7 @@ class PocketLibraryApplication: Application(), SingletonImageLoader.Factory {
             .build()
 
         bookRepository = BookRepository(
+            appContext = applicationContext,
             database = database,
             remoteDataSource = BookRemoteDataSource()
         )

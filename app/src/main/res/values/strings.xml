@@ -69,4 +69,13 @@
 
     <string name="search_online">Search online</string>
     <string name="search_by_title_or_author">Search by title or author</string>
+
+    <string name="book_text">Book text</string>
+    <string name="text_attached">A text file is attached — tap Read on the book\'s details page to open it.</string>
+    <string name="attach_text_file">Attach text file</string>
+    <string name="replace_text_file">Replace text file</string>
+    <string name="remove">Remove</string>
+    <string name="text_file_too_large">Could not attach the file — it may be too large (limit 5 MB) or unreadable.</string>
+    <string name="could_not_load_text">Could not load this book\'s text.</string>
+    <string name="read">Read</string>
 </resources>

@@ -16,6 +16,7 @@ fun AddBookScreenVisual(
         bookWithTags = null,
         screenTitle = stringResource(R.string.add_a_book),
         saveButtonText = stringResource(R.string.save),
+        bookViewModel = bookViewModel,
         onSave = { book, tags ->
             bookViewModel.addBook(book, tags)
             onBookSaved()

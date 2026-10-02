@@ -16,6 +16,7 @@ fun EditBookScreenVisual(
         bookWithTags = bookWithTags,
         screenTitle = stringResource(R.string.edit_book),
         saveButtonText = stringResource(R.string.edit),
+        bookViewModel = bookViewModel,
         onSave = { book, tags ->
             bookViewModel.updateBook(book, tags)
             onBookUpdate()

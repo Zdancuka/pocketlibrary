@@ -16,5 +16,6 @@ data class BookEntity(
     val bookDescription: String? = null,
     val bookNotes: String? = null,
     val imageUri: String? = null,
-    val updatedAt: Long = System.currentTimeMillis()
+    val updatedAt: Long = System.currentTimeMillis(),
+    val contentFileName: String? = null,
 )

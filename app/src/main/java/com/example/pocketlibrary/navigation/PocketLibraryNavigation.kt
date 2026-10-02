@@ -19,6 +19,7 @@ import com.example.pocketlibrary.ui.screen.navbarScreens.AddBookScreenVisual
 import com.example.pocketlibrary.ui.screen.AuthScreen
 import com.example.pocketlibrary.ui.screen.BookDetailsScreen
 import com.example.pocketlibrary.ui.screen.EditBookScreenVisual
+import com.example.pocketlibrary.ui.screen.ReaderScreen
 import com.example.pocketlibrary.ui.screen.navbarScreens.LibraryScreen
 import com.example.pocketlibrary.ui.screen.navbarScreens.ProfileScreen
 import com.example.pocketlibrary.ui.screen.navbarScreens.SearchScreen
@@ -134,6 +135,23 @@ fun PocketLibraryNavigation() {
                         bookWithTags = details,
                         bookViewModel = bookViewModel,
                         navController = navController
+                    )
+                }
+            }
+
+            composable (
+                route = Screen.Reader.route,
+                arguments = listOf(navArgument("bookId"){
+                    type = NavType.StringType })
+            ) { backStackEntry ->
+                val bookId = backStackEntry.arguments?.getString("bookId") ?: ""
+                val bookWithTags by bookViewModel.bookFlow(bookId).collectAsState(initial = null)
+
+                bookWithTags?.let { details ->
+                    ReaderScreen(
+                        book = details.book,
+                        bookViewModel = bookViewModel,
+                        onBack = {navController.popBackStack()}
                     )
                 }
             }

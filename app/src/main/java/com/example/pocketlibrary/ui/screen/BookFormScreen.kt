@@ -1,7 +1,6 @@
 package com.example.pocketlibrary.ui.screen
 
 import android.content.Intent
-import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -22,7 +21,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -43,7 +41,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -64,19 +61,24 @@ import com.example.pocketlibrary.ui.screen.element.LabeledField
 import com.example.pocketlibrary.ui.screen.element.LabeledMultilineField
 import com.example.pocketlibrary.ui.screen.element.OpenLibraryResultRow
 import com.example.pocketlibrary.ui.theme.Dimens
+import com.example.pocketlibrary.ui.viewmodel.BookViewModel
 import com.example.pocketlibrary.ui.viewmodel.OpenLibrarySearchViewModel
+import java.util.UUID
 
 
 @Composable
 fun BookFormScreen(
-    bookWithTags : BookWithTags? ,
-    screenTitle : String ,
-    saveButtonText : String ,
-    onSave : (BookEntity , List<String>) -> Unit
+    bookWithTags: BookWithTags?,
+    screenTitle: String,
+    saveButtonText: String,
+    bookViewModel: BookViewModel,
+    onSave: (BookEntity, List<String>) -> Unit
 ) {
     val context = LocalContext.current
     val existingBook = bookWithTags?.book
     val isAddMode = bookWithTags == null
+
+    val workingBookId by remember { mutableStateOf(existingBook?.bookId ?: UUID.randomUUID().toString()) }
 
     var title by remember { mutableStateOf(existingBook?.title ?: "") }
     var author by remember { mutableStateOf(existingBook?.author ?: "") }
@@ -86,12 +88,17 @@ fun BookFormScreen(
     var notes by remember { mutableStateOf(existingBook?.bookNotes ?: "") }
     var tagInput by remember { mutableStateOf("") }
     var tags by remember { mutableStateOf(bookWithTags?.tags?.map { it.name } ?: emptyList()) }
-    var selectedImageUri by remember { mutableStateOf<Uri?>(existingBook?.imageUri?.toUri()) }
+    var selectedImageUri by remember { mutableStateOf(existingBook?.imageUri?.toUri()) }
+    var attachedFileName by remember { mutableStateOf(existingBook?.contentFileName) }
 
     val openLibraryViewMode : OpenLibrarySearchViewModel = viewModel()
     val searchQuery by openLibraryViewMode.query.collectAsState()
     val searchResults by openLibraryViewMode.results.collectAsState()
     val isSearching by openLibraryViewMode.isSearching.collectAsState()
+
+    var isAttachingText by remember { mutableStateOf(false) }
+    var textAttachFailed by remember { mutableStateOf(false) }
+
 
     fun applyOpenLibraryPick(doc : OpenLibraryDoc) {
         title = doc.title
@@ -109,6 +116,33 @@ fun BookFormScreen(
                 Intent.FLAG_GRANT_READ_URI_PERMISSION
             )
             selectedImageUri = uri
+        }
+    }
+
+    fun currentBookForText(): BookEntity =
+        existingBook?.copy(bookId = workingBookId, contentFileName = attachedFileName)
+            ?: BookEntity(
+                bookId = workingBookId,
+                title = title,
+                author = author,
+                contentFileName = attachedFileName
+            )
+
+    val textPickerLaunch = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) {
+        uri ->
+        if( uri != null){
+           isAttachingText = true
+           textAttachFailed = false
+
+           bookViewModel.attachBookText(currentBookForText(), uri) { update ->
+               isAttachingText = false
+               if (update != null) {
+                   attachedFileName = update.contentFileName
+                   } else{
+               textAttachFailed = true}
+           }
         }
     }
 
@@ -207,6 +241,78 @@ fun BookFormScreen(
                 }
             }
         }
+
+            item {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(Dimens.CornerSmall))
+                        .border(
+                            Dimens.BorderThin ,
+                            MaterialTheme.colorScheme.secondary ,
+                            RoundedCornerShape(Dimens.CornerSmall)
+                        )
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                        .padding(Dimens.SpaceSmall)
+                ) {
+                    Text(
+                        text = stringResource(R.string.book_text) ,
+                        fontWeight = FontWeight.SemiBold ,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+
+                    Spacer(modifier = Modifier.height(Dimens.SpaceXXSmall))
+
+                    if (attachedFileName != null) {
+                        Text(
+                            text = stringResource(R.string.text_attached) ,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant ,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                        Spacer(modifier = Modifier.height(Dimens.SpaceXSmall))
+                    }
+
+                    Row(horizontalArrangement = Arrangement.spacedBy(Dimens.SpaceSmall)) {
+                        Button(
+                            onClick = { textPickerLaunch.launch("text/plain") } ,
+                            enabled = !isAttachingText
+                        ) {
+                            Text(
+                                text = if (attachedFileName != null)
+                                    stringResource(R.string.replace_text_file)
+                                else
+                                    stringResource(R.string.attach_text_file)
+                            )
+                        }
+
+                        if (attachedFileName != null) {
+                            Button(
+                                onClick = { bookViewModel.removeBookText(currentBookForText()) } ,
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.error ,
+                                    contentColor = MaterialTheme.colorScheme.onError
+                                )
+                            ) {
+                                Text(stringResource(R.string.remove))
+                            }
+                        }
+                    }
+
+                    if (isAttachingText) {
+                        Spacer(modifier = Modifier.height(Dimens.SpaceXSmall))
+                        CircularProgressIndicator()
+                    }
+
+                    if (textAttachFailed) {
+                        Spacer(modifier = Modifier.height(Dimens.SpaceXSmall))
+                        Text(
+                            text = stringResource(R.string.text_file_too_large) ,
+                            color = MaterialTheme.colorScheme.error ,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                }
+            }
 
         item {
             LabeledField(
@@ -354,15 +460,18 @@ fun BookFormScreen(
                         pageNumber = pageCount ,
                         bookDescription = description ,
                         bookNotes = notes ,
-                        imageUri = selectedImageUri?.toString()
+                        imageUri = selectedImageUri?.toString(),
+                        contentFileName = attachedFileName
                     ) ?: BookEntity(
+                        bookId = workingBookId,
                         title = title ,
                         author = author ,
                         language = language ,
                         pageNumber = pageCount ,
                         bookDescription = description ,
                         bookNotes = notes ,
-                        imageUri = selectedImageUri?.toString()
+                        imageUri = selectedImageUri?.toString(),
+                        contentFileName = attachedFileName
                     )
                     onSave(bookToSave , tags)
                 } ,

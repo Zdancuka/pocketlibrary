@@ -1,16 +1,22 @@
 package com.example.pocketlibrary.data.repository
 
+import android.content.Context
 import androidx.room.withTransaction
+import android.net.Uri
+import com.example.pocketlibrary.data.local.BookTextStorage
 import com.example.pocketlibrary.data.local.database.PocketLibraryDatabase
 import com.example.pocketlibrary.data.local.entity.BookEntity
 import com.example.pocketlibrary.data.local.entity.BookTagCrossRef
 import com.example.pocketlibrary.data.local.entity.TagEntity
 import com.example.pocketlibrary.data.remote.BookDto
 import com.example.pocketlibrary.data.remote.BookRemoteDataSource
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class BookRepository(
     private val database : PocketLibraryDatabase ,
-    private val remoteDataSource : BookRemoteDataSource
+    private val remoteDataSource : BookRemoteDataSource,
+    private val appContext: Context
 ) {
 
     fun observeBookWithTags(
@@ -26,7 +32,13 @@ class BookRepository(
         uid : String ,
         bookId : String
     ) {
+        val local = database.bookDao().getBookOnce(bookId)
         database.bookDao().deleteBookAndRef(uid , bookId)
+        local?.contentFileName?.let { fileName ->
+            withContext(Dispatchers.IO){
+                BookTextStorage.deleteText(appContext, fileName)
+            }
+        }
         runCatching {
             remoteDataSource.markBookDeleted(
                 uid , bookId , System.currentTimeMillis()
@@ -41,12 +53,22 @@ class BookRepository(
         book : BookEntity ,
         tags : List<String>
     ) {
-        val stamped = book.copy(uid = uid)
+        //val stamped = book.copy(uid = uid)
+        lateinit var stamped : BookEntity
 
         database.withTransaction {
+            val existing = database.bookDao().getBookOnce(book.bookId)
+            stamped = book.copy(
+                uid = uid,
+                contentFileName = book.contentFileName ?: existing?.contentFileName
+            )
+            if(existing == null){
             database.bookDao().insertBook(stamped)
-            val tagIds = resolveTagIds(tags)
+            } else{
+                database.bookDao().updateBook(stamped)
+            }
 
+            val tagIds = resolveTagIds(tags)
             database.bookTagDao().insertAll(
                 tagIds.map { tagId ->
                     BookTagCrossRef(bookId = stamped.bookId , tagId = tagId)
@@ -81,6 +103,46 @@ class BookRepository(
         pushToRemote(uid , updated , tags)
     }
 
+    suspend fun attachBookText(
+        uid: String,
+        book: BookEntity,
+        uri: Uri
+    ): BookEntity? = withContext(Dispatchers.IO){
+        val oldFileName = book.contentFileName
+        val newFileName = BookTextStorage.saveText(appContext, book.bookId, uri)?: return@withContext null
+
+        if (oldFileName != null && oldFileName != newFileName) {
+            BookTextStorage.deleteText(appContext, oldFileName)
+        }
+
+        val updated = book.copy(
+            uid = uid ,
+            contentFileName = newFileName,
+            updatedAt = System.currentTimeMillis()
+        )
+
+        val existing = database.bookDao().getBookOnce(updated.bookId)
+        if(existing == null){
+            database.bookDao().insertBook(updated)
+        } else{
+            database.bookDao().updateBook(updated)
+        }
+        updated
+    }
+
+    suspend fun removeBookText(book : BookEntity) {
+        withContext(Dispatchers.IO) {
+            BookTextStorage.deleteText(appContext , book.contentFileName)
+        }
+        val updated = book.copy(contentFileName = null , updatedAt = System.currentTimeMillis())
+        database.bookDao().updateBook(updated)
+    }
+
+    suspend fun readBookText(book : BookEntity) : String? = withContext(Dispatchers.IO) {
+        val fileName = book.contentFileName ?: return@withContext null
+        BookTextStorage.readText(appContext , fileName)
+    }
+
     suspend fun syncFromRemote(uid : String) {
         val remoteBooks = runCatching {
             remoteDataSource.fetchAllBooks(uid)
@@ -95,6 +157,11 @@ class BookRepository(
 
             if (dto.deleted) {
                 if (local != null) {
+                    local.contentFileName?.let {fileName ->
+                        withContext(Dispatchers.IO){
+                            BookTextStorage.deleteText(appContext, fileName)
+                        }
+                    }
                     database.bookDao().deleteBookAndRef(uid , dto.bookId)
                 }
                 continue
@@ -111,7 +178,8 @@ class BookRepository(
                     bookDescription = dto.bookDescription ,
                     bookNotes = dto.bookNotes ,
                     imageUri = dto.imageUri ,
-                    updatedAt = dto.updatedAt
+                    updatedAt = dto.updatedAt,
+                    contentFileName = local?.contentFileName
                 )
                 database.withTransaction {
                     if (local == null) database.bookDao().insertBook(entity)

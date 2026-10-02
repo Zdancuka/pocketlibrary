@@ -16,6 +16,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -52,7 +54,7 @@ import com.example.pocketlibrary.ui.viewmodel.BookViewModel
 fun BookDetailsScreen(
     bookViewModel: BookViewModel,
     bookWithTags: BookWithTags,
-    navController: NavHostController
+    navController: NavHostController,
 ) {
     val book = bookWithTags.book
     val tags = bookWithTags.tags
@@ -135,6 +137,7 @@ private fun BookDetailsPortrait(
             BookDetailsContent(
                 tags = tags,
                 book = book,
+                onReadClick = {navController.navigate(Screen.Reader.createRoute(book.bookId))},
                 modifier = Modifier.padding(horizontal = Dimens.SpaceLarge)
             )
         }
@@ -208,6 +211,7 @@ private fun BookDetailsLandscape(
                 BookDetailsContent(
                     tags = tags,
                     book = book,
+                    onReadClick = {navController.navigate(Screen.Reader.createRoute(book.bookId))},
                     modifier = Modifier
                         .padding(
                             horizontal = Dimens.SpaceLarge,
@@ -224,6 +228,7 @@ private fun BookDetailsLandscape(
 private fun BookDetailsContent(
     tags: List<TagEntity>,
     book: BookEntity,
+    onReadClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
 
@@ -288,6 +293,24 @@ private fun BookDetailsContent(
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurface
         )
+
+        Spacer(modifier = Modifier.height(Dimens.SpaceMedium))
+
+
+        if( book.contentFileName != null){
+            Button(
+                onClick = onReadClick,
+                modifier = Modifier
+                    .fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                ),
+                shape = RoundedCornerShape(Dimens.CornerXSmall)
+            ) {
+                Text(stringResource(R.string.read))
+            }
+        }
 
         Spacer(modifier = Modifier.height(Dimens.SpaceLarge))
     }

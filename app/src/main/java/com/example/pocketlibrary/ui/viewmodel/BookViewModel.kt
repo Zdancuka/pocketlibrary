@@ -1,5 +1,6 @@
 package com.example.pocketlibrary.ui.viewmodel
 
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -94,8 +95,9 @@ class BookViewModel (
         val currentUid = uid ?: return
         viewModelScope.launch {
             repository.addBookWithTags(currentUid, book, tags)
+            }
         }
-    }
+
 
     fun updateBook(book: BookEntity, tags: List<String>){
         val currentUid = uid ?: return
@@ -121,6 +123,22 @@ class BookViewModel (
             repository.syncFromRemote(currentUid)
         }
     }
+
+    fun attachBookText(book: BookEntity, uri: Uri, onResult: (BookEntity?) -> Unit = {}){
+        val currentUid = uid ?: return
+        viewModelScope.launch {
+            val updated = repository.attachBookText(currentUid, book, uri)
+            onResult(updated)
+        }
+    }
+
+    fun removeBookText(book: BookEntity){
+        viewModelScope.launch {
+            repository.removeBookText(book)
+        }
+    }
+
+    suspend fun readBookText(book: BookEntity): String? = repository.readBookText(book)
 
     class Factory(private val repository: BookRepository): ViewModelProvider.Factory{
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
