@@ -26,6 +26,7 @@ interface BookDao {
     @Query("SELECT * FROM books WHERE uid = :uid AND bookId = :bookId LIMIT 1")
     fun observeBookWithTags(uid: String, bookId: String): Flow<BookWithTags?>
 
+    @Transaction
     @Query ("SELECT * FROM books WHERE uid = :uid")
     suspend fun getAllBookOnce (uid: String): List<BookWithTags>
 
