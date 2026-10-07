@@ -132,6 +132,10 @@ class BookViewModel (
         }
     }
 
+    // removeBookText deletes the file but has no callback — the composable's attachedFileName
+    // state won't update, so the "Remove" button and "Text attached" label stay visible after clicking.
+    // Fix: add onResult: () -> Unit = {} (like attachBookText does) and call it after removing,
+    // then the screen can do: attachedFileName = null
     fun removeBookText(book: BookEntity){
         viewModelScope.launch {
             repository.removeBookText(book)

@@ -15,6 +15,7 @@ interface OpenLibraryApiService {
     ) : OpenLibrarySearchResponse
 }
 
+// Typo: should be "OpenLibraryClient"
 object OpenLibraryClint {
     val api : OpenLibraryApiService by lazy {
         Retrofit.Builder()

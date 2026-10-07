@@ -78,6 +78,9 @@ fun BookFormScreen(
     val existingBook = bookWithTags?.book
     val isAddMode = bookWithTags == null
 
+
+    // if the user fills in the form, attaches a file, then presses Back without saving,
+    // the file stays in internal storage forever with no book referencing it (orphaned file).
     val workingBookId by remember { mutableStateOf(existingBook?.bookId ?: UUID.randomUUID().toString()) }
 
     var title by remember { mutableStateOf(existingBook?.title ?: "") }
@@ -230,6 +233,13 @@ fun BookFormScreen(
                         }
                     }
 
+                    // These results are inside a single item{} block, so LazyColumn treats them
+                    // as one big chunk — it can't recycle individual rows or skip off-screen ones.
+                    // With 20 results it's fine, but the idiomatic Compose pattern is to move this
+                    // outside item{} and use the items()  directly in the LazyColumn:
+                    //   items(searchResults) { doc ->
+                    //       OpenLibraryResultRow(doc = doc, onClick = { applyOpenLibraryPick(doc) })
+                    //   }
                     searchResults.forEach { doc ->
                         Spacer(modifier = Modifier.height(Dimens.SpaceXXSmall))
                         OpenLibraryResultRow(
