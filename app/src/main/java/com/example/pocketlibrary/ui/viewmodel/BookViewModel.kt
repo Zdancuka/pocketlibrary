@@ -132,10 +132,16 @@ class BookViewModel (
         }
     }
 
-    fun removeBookText(book: BookEntity){
+    fun removeBookText(book: BookEntity, onDone: () -> Unit = {} ){
         viewModelScope.launch {
             repository.removeBookText(book)
+            onDone()
         }
+    }
+
+    fun discardDraftBook(bookId: String){
+        val currentUid = uid ?: return
+        viewModelScope.launch { repository.discardDraftBook(currentUid, bookId) }
     }
 
     suspend fun readBookText(book: BookEntity): String? = repository.readBookText(book)

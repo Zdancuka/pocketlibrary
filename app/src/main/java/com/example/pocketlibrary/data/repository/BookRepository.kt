@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.withTransaction
 import android.net.Uri
 import com.example.pocketlibrary.data.local.BookTextStorage
+import com.example.pocketlibrary.data.local.BookCoverStorage
 import com.example.pocketlibrary.data.local.database.PocketLibraryDatabase
 import com.example.pocketlibrary.data.local.entity.BookEntity
 import com.example.pocketlibrary.data.local.entity.BookTagCrossRef
@@ -38,6 +39,9 @@ class BookRepository(
             withContext(Dispatchers.IO){
                 BookTextStorage.deleteText(appContext, fileName)
             }
+        }
+        withContext(Dispatchers.IO){
+            BookCoverStorage.deleteForBook(appContext, bookId)
         }
         runCatching {
             remoteDataSource.markBookDeleted(
@@ -143,6 +147,14 @@ class BookRepository(
         BookTextStorage.readText(appContext , fileName)
     }
 
+    suspend fun discardDraftBook(uid: String, bookId : String){
+        val local = database.bookDao().getBookOnce(bookId) ?: return
+        withContext(Dispatchers.IO){
+            BookTextStorage.deleteText(appContext, local.contentFileName)
+        }
+        database.bookDao().deleteBookAndRef(uid, bookId)
+    }
+
     suspend fun syncFromRemote(uid : String) {
         val remoteBooks = runCatching {
             remoteDataSource.fetchAllBooks(uid)
@@ -157,10 +169,11 @@ class BookRepository(
 
             if (dto.deleted) {
                 if (local != null) {
-                    local.contentFileName?.let {fileName ->
-                        withContext(Dispatchers.IO){
-                            BookTextStorage.deleteText(appContext, fileName)
+                    withContext(Dispatchers.IO) {
+                        local.contentFileName?.let {
+                            BookTextStorage.deleteText(appContext, it)
                         }
+                        BookCoverStorage.deleteForBook(appContext, dto.bookId)
                     }
                     database.bookDao().deleteBookAndRef(uid , dto.bookId)
                 }
@@ -168,6 +181,13 @@ class BookRepository(
             }
 
             if (local == null || dto.updatedAt > local.updatedAt) {
+
+                val imageUri = dto.coverBase64?.let { base64 ->
+                    withContext(Dispatchers.IO){
+                        BookCoverStorage.saveFromBase64(appContext, dto.bookId, base64)
+                    }
+                } ?: dto.imageUri
+
                 val entity = BookEntity(
                     bookId = dto.bookId ,
                     uid = uid ,
@@ -177,7 +197,7 @@ class BookRepository(
                     pageNumber = dto.pageNumber ,
                     bookDescription = dto.bookDescription ,
                     bookNotes = dto.bookNotes ,
-                    imageUri = dto.imageUri ,
+                    imageUri = imageUri ,
                     updatedAt = dto.updatedAt,
                     contentFileName = local?.contentFileName
                 )
@@ -201,6 +221,14 @@ class BookRepository(
     }
 
     private suspend fun pushToRemote(uid : String , book : BookEntity , tag : List<String>) {
+
+        val hasLocalCover = BookCoverStorage.isLocalUri(book.imageUri)
+        val coverBase64 = if (hasLocalCover){
+            withContext(Dispatchers.IO){
+                BookCoverStorage.encodeToBase64(appContext, book.imageUri!!)
+            }
+        } else null
+
         runCatching {
             remoteDataSource.pushBook(
                 uid ,
@@ -212,9 +240,10 @@ class BookRepository(
                     pageNumber = book.pageNumber ,
                     bookDescription = book.bookDescription ,
                     bookNotes = book.bookNotes ,
-                    imageUri = book.imageUri ,
+                    imageUri = if (hasLocalCover) null else book.imageUri ,
                     updatedAt = book.updatedAt ,
-                    tags = tag
+                    tags = tag,
+                    coverBase64 = coverBase64
                 )
             )
         }.onFailure { e -> android.util.Log.e(

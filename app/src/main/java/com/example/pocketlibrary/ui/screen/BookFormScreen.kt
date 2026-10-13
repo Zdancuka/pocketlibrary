@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -33,6 +34,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -99,6 +101,15 @@ fun BookFormScreen(
     var isAttachingText by remember { mutableStateOf(false) }
     var textAttachFailed by remember { mutableStateOf(false) }
 
+    var saved by remember { mutableStateOf(false) }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            if (isAddMode && !saved && attachedFileName != null){
+                bookViewModel.discardDraftBook(workingBookId)
+            }
+        }
+    }
 
     fun applyOpenLibraryPick(doc : OpenLibraryDoc) {
         title = doc.title
@@ -186,35 +197,35 @@ fun BookFormScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(Dimens.CornerSmall))
-                        .border(
-                            Dimens.BorderThin ,
-                            MaterialTheme.colorScheme.secondary,
-                            RoundedCornerShape(Dimens.CornerSmall)
-                        )
+//                        .border(
+//                            Dimens.BorderThin ,
+//                            MaterialTheme.colorScheme.secondary,
+//                            RoundedCornerShape(Dimens.CornerSmall)
+//                        )
                         .background(MaterialTheme.colorScheme.surfaceVariant)
                         .padding(Dimens.SpaceSmall)
                 ) {
                     Text(
-                        text = stringResource(R.string.search_online) ,
-                        fontWeight = FontWeight.SemiBold ,
+                        text = stringResource(R.string.search_online),
+                        fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.onSurface
                     )
 
                     Spacer(modifier = Modifier.height(Dimens.SpaceXXSmall))
 
                     TextField(
-                        value = searchQuery ,
-                        onValueChange = { openLibraryViewMode.onQueryChange(it) } ,
-                        placeholder = { Text(stringResource(R.string.search_by_title_or_author)) } ,
+                        value = searchQuery,
+                        onValueChange = { openLibraryViewMode.onQueryChange(it) },
+                        placeholder = { Text(stringResource(R.string.search_by_title_or_author)) },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clip(RoundedCornerShape(Dimens.CornerXSmall)) ,
-                        singleLine = true ,
-                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search) ,
+                            .clip(RoundedCornerShape(Dimens.CornerXSmall)),
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                         colors = TextFieldDefaults.colors(
-                            unfocusedContainerColor = MaterialTheme.colorScheme.surface ,
-                            focusedContainerColor = MaterialTheme.colorScheme.surface ,
-                            unfocusedIndicatorColor = Color.Transparent ,
+                            unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                            focusedContainerColor = MaterialTheme.colorScheme.surface,
+                            unfocusedIndicatorColor = Color.Transparent,
                             focusedIndicatorColor = Color.Transparent
                         )
                     )
@@ -223,22 +234,17 @@ fun BookFormScreen(
 
                     if (isSearching) {
                         Box(
-                            modifier = Modifier.fillMaxWidth() ,
+                            modifier = Modifier.fillMaxWidth(),
                             contentAlignment = Alignment.Center
                         ) {
                             CircularProgressIndicator()
                         }
                     }
-
-                    searchResults.forEach { doc ->
-                        Spacer(modifier = Modifier.height(Dimens.SpaceXXSmall))
-                        OpenLibraryResultRow(
-                            doc = doc ,
-                            onClick = { applyOpenLibraryPick(doc) }
-                            )
-                        Spacer(modifier = Modifier.height(Dimens.SpaceXSmall))
-                    }
                 }
+            }
+
+            items(searchResults) { doc ->
+                OpenLibraryResultRow(doc = doc, onClick = { applyOpenLibraryPick(doc) })
             }
         }
 
@@ -287,7 +293,9 @@ fun BookFormScreen(
 
                         if (attachedFileName != null) {
                             Button(
-                                onClick = { bookViewModel.removeBookText(currentBookForText()) } ,
+                                onClick = { bookViewModel.removeBookText(currentBookForText()){
+                                    attachedFileName = null
+                                } } ,
                                 colors = ButtonDefaults.buttonColors(
                                     containerColor = MaterialTheme.colorScheme.error ,
                                     contentColor = MaterialTheme.colorScheme.onError
@@ -452,6 +460,7 @@ fun BookFormScreen(
         item {
             Button(
                 onClick = {
+                    saved = true
                     val pageCount = pageCountText.toIntOrNull()
                     val bookToSave = existingBook?.copy(
                         title = title ,
