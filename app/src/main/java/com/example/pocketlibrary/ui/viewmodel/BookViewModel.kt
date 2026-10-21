@@ -16,7 +16,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 private const val STOP_TIMEOUT_MS = 5000L
@@ -63,24 +65,49 @@ class BookViewModel (
 
     val searchQuery = MutableStateFlow("")
 
+    val filters = MutableStateFlow(BookFilters())
+
+    val availableTags: StateFlow<List<String>> = books
+        .map { list ->
+            list.flatMap { it.tags.map { tag -> tag.name } }
+                .distinctBy { it.lowercase() }
+                .sortedBy { it.lowercase() }
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS),
+            initialValue = emptyList()
+        )
+
     val filteredBooks: StateFlow<List<BookWithTags>> = combine(
         books,
-        searchQuery
-    ) { books, query ->
-        if (query.isBlank()) {
-            books
-        } else {
-            books.filter { bookWithTags ->
-                bookWithTags.book.title.contains(query, ignoreCase = true) ||
-                    bookWithTags.book.author.contains(query, ignoreCase = true) ||
-                    bookWithTags.tags.any { tag -> tag.name.contains(query, ignoreCase = true) }
-            }
-        }
+        searchQuery,
+        filters
+    ) { books, query, filters ->
+        books.applySearchAndFilters(query, filters)
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS),
         initialValue = emptyList()
     )
+
+    fun toggleTag(tag: String) {
+        filters.update { it.copy(selectedTags = it.selectedTags.toggled(tag)) }
+    }
+
+    fun setOnlyWithFile(enabled: Boolean) {
+        filters.update { it.copy(onlyWithFile = enabled) }
+    }
+
+    fun setSort(sort: BookSort) {
+        filters.update { it.copy(sort = sort) }
+    }
+
+    fun clearFilters() {
+        filters.update {
+            it.copy(selectedTags = emptySet(), onlyWithFile = false)
+        }
+    }
 
     fun onSearchQueryChange(query: String) {
         searchQuery.value = query
@@ -153,3 +180,6 @@ class BookViewModel (
         }
     }
 }
+
+private fun Set<String>.toggled(value: String): Set<String> =
+        if (value in this) this - value else this + value

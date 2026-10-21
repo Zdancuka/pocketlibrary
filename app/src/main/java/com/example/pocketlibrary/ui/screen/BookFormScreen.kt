@@ -140,7 +140,7 @@ fun BookFormScreen(
             )
 
     val textPickerLaunch = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
+        contract = ActivityResultContracts.OpenDocument()
     ) {
         uri ->
         if( uri != null){
@@ -280,7 +280,7 @@ fun BookFormScreen(
 
                     Row(horizontalArrangement = Arrangement.spacedBy(Dimens.SpaceSmall)) {
                         Button(
-                            onClick = { textPickerLaunch.launch("text/plain") } ,
+                            onClick = { textPickerLaunch.launch(arrayOf("text/plain", "application/pdf")) } ,
                             enabled = !isAttachingText
                         ) {
                             Text(

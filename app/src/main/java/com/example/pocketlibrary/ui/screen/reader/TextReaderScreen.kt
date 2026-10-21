@@ -1,4 +1,4 @@
-package com.example.pocketlibrary.ui.screen
+package com.example.pocketlibrary.ui.screen.reader
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,7 +30,7 @@ import com.example.pocketlibrary.R
 import com.example.pocketlibrary.ui.theme.Dimens
 
 @Composable
-fun ReaderScreen(
+fun TextReaderScreen(
     book: BookEntity,
     bookViewModel: BookViewModel,
     onBack: () -> Unit

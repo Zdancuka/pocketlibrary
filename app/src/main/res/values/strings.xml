@@ -75,7 +75,21 @@
     <string name="attach_text_file">Attach text file</string>
     <string name="replace_text_file">Replace text file</string>
     <string name="remove">Remove</string>
-    <string name="text_file_too_large">Could not attach the file — it may be too large (limit 5 MB) or unreadable.</string>
     <string name="could_not_load_text">Could not load this book\'s text.</string>
     <string name="read">Read</string>
+
+    <string name="could_not_open_pdf">Could not open this PDF. It may be password-protected or damaged.</string>
+    <string name="pdf_page_counter">Page %1$d of %2$d</string>
+    <string name="text_file_too_large">Could not attach the file — limit is 5 MB for text and 25 MB for PDF, or the file is unreadable.</string>
+
+    <string name="filters">Filters</string>
+    <string name="filters_with_count">Filters (%1$d)</string>
+    <string name="clear_filters">Clear</string>
+    <string name="sort_by">Sort by</string>
+    <string name="sort_recent">Recently updated</string>
+    <string name="sort_title">Title A–Z</string>
+    <string name="sort_author">Author A–Z</string>
+    <string name="reading">Reading</string>
+    <string name="with_attached_file">With attached file</string>
+    <string name="no_matching_books">No books match your search and filters</string>
 </resources>

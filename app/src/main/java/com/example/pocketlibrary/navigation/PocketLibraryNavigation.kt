@@ -19,7 +19,7 @@ import com.example.pocketlibrary.ui.screen.navbarScreens.AddBookScreenVisual
 import com.example.pocketlibrary.ui.screen.AuthScreen
 import com.example.pocketlibrary.ui.screen.BookDetailsScreen
 import com.example.pocketlibrary.ui.screen.EditBookScreenVisual
-import com.example.pocketlibrary.ui.screen.ReaderScreen
+import com.example.pocketlibrary.ui.screen.reader.ReaderScreen
 import com.example.pocketlibrary.ui.screen.navbarScreens.LibraryScreen
 import com.example.pocketlibrary.ui.screen.navbarScreens.ProfileScreen
 import com.example.pocketlibrary.ui.screen.navbarScreens.SearchScreen

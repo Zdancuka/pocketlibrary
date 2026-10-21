@@ -31,6 +31,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import coil3.compose.AsyncImage
 import com.example.pocketlibrary.R
 import com.example.pocketlibrary.data.local.entity.BookWithTags
+import com.example.pocketlibrary.ui.screen.element.BookFilterMenu
 import com.example.pocketlibrary.ui.screen.element.OutlinedTag
 import com.example.pocketlibrary.ui.screen.element.SearchBar
 import com.example.pocketlibrary.ui.screen.element.SwipeToDeleteCard
@@ -49,6 +50,10 @@ fun SearchScreen(
     // computed here on every recomposition — see BookViewModel.searchQuery / filteredBooks.
     val query by bookViewModel.searchQuery.collectAsState()
     val filteredBooks by bookViewModel.filteredBooks.collectAsState()
+
+    val allBooks by bookViewModel.books.collectAsState()
+    val filters by bookViewModel.filters.collectAsState()
+    val availableTags by bookViewModel.availableTags.collectAsState()
 
     LazyColumn(
         modifier = Modifier
@@ -88,6 +93,17 @@ fun SearchScreen(
                         stringResource(R.string.books_with_word) + " \"$query\"",
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface
+            )
+        }
+
+        item {
+            BookFilterMenu(
+                filters = filters,
+                availableTags = availableTags,
+                onToggleTag = bookViewModel::toggleTag,
+                onOnlyWithFileChange = bookViewModel::setOnlyWithFile,
+                onSortChange = bookViewModel::setSort,
+                onClear = bookViewModel::clearFilters
             )
         }
 
