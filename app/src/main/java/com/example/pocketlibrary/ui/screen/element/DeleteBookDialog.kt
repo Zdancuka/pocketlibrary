@@ -10,24 +10,24 @@ import com.example.pocketlibrary.R
 
 @Composable
 fun DeleteBookDialog(
-    bookTitle: String,
-    onConfirm: () -> Unit,
-    onDismiss: () -> Unit
-){
+    bookTitle : String ,
+    onConfirm : () -> Unit ,
+    onDismiss : () -> Unit
+) {
     AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.delete_book_title)) },
-        text = { Text(stringResource(R.string.delete_book_message, bookTitle)) },
+        onDismissRequest = onDismiss ,
+        title = { Text(stringResource(R.string.delete_book_title)) } ,
+        text = { Text(stringResource(R.string.delete_book_message , bookTitle)) } ,
         confirmButton = {
-            TextButton (
+            TextButton(
                 onClick = onConfirm
             ) {
                 Text(
-                    text = stringResource(R.string.delete),
+                    text = stringResource(R.string.delete) ,
                     color = MaterialTheme.colorScheme.error
                 )
             }
-        },
+        } ,
         dismissButton = {
             TextButton(onClick = onDismiss) {
                 Text(stringResource(R.string.cancel))

@@ -2,24 +2,22 @@ package com.example.pocketlibrary.data.local
 
 import android.graphics.pdf.PdfRenderer
 import android.os.ParcelFileDescriptor
-import androidx.annotation.Px
-import androidx.compose.ui.graphics.Color
+import androidx.core.graphics.createBitmap
 import coil3.Bitmap
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.io.File
 import kotlin.math.roundToInt
-import androidx.core.graphics.createBitmap
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 
-class PdfPageRenderer(file: File){
-    private val descriptor = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
+class PdfPageRenderer(file : File) {
+    private val descriptor = ParcelFileDescriptor.open(file , ParcelFileDescriptor.MODE_READ_ONLY)
     private val renderer = try {
         PdfRenderer(descriptor)
-    } catch (e: Exception){
+    } catch (e : Exception) {
         descriptor.close()
         throw e
     }
@@ -27,26 +25,27 @@ class PdfPageRenderer(file: File){
     private val mutex = Mutex()
     private var closed = false
 
-    val pageCount: Int = renderer.pageCount
+    val pageCount : Int = renderer.pageCount
 
-    suspend fun renderPage(index: Int, targedWidthPx: Int): Bitmap? = withContext(Dispatchers.IO){
-        mutex.withLock {
-            if (closed) return@withLock null
-            renderer.openPage(index).use{ page ->
-                val height = (targedWidthPx.toFloat()* page.height / page.width)
-                    .roundToInt().coerceAtLeast(1)
-                val bitmap = createBitmap(targedWidthPx, height)
-                bitmap.eraseColor(android.graphics.Color.WHITE)
-                page.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
-                bitmap
+    suspend fun renderPage(index : Int , targedWidthPx : Int) : Bitmap? =
+        withContext(Dispatchers.IO) {
+            mutex.withLock {
+                if (closed) return@withLock null
+                renderer.openPage(index).use { page ->
+                    val height = (targedWidthPx.toFloat() * page.height / page.width)
+                        .roundToInt().coerceAtLeast(1)
+                    val bitmap = createBitmap(targedWidthPx , height)
+                    bitmap.eraseColor(android.graphics.Color.WHITE)
+                    page.render(bitmap , null , null , PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
+                    bitmap
+                }
             }
         }
-    }
 
-    fun close(){
+    fun close() {
         CoroutineScope(Dispatchers.IO).launch {
             mutex.withLock {
-                if (!closed){
+                if (! closed) {
                     closed = true
                     renderer.close()
                     descriptor.close()

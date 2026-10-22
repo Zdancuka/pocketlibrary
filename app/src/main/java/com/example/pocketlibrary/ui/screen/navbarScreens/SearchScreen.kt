@@ -22,6 +22,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
@@ -42,16 +43,15 @@ const val MAX_TAGS_TO_SHOW = 3
 
 @Composable
 fun SearchScreen(
-    bookViewModel: BookViewModel,
-    onBookClick: (BookWithTags) -> Unit = { }
+    bookViewModel : BookViewModel ,
+    onBookClick : (BookWithTags) -> Unit = { }
 ) {
 
     // query and filteredBooks come from the ViewModel (via combine) instead of being
     // computed here on every recomposition — see BookViewModel.searchQuery / filteredBooks.
     val query by bookViewModel.searchQuery.collectAsState()
     val filteredBooks by bookViewModel.filteredBooks.collectAsState()
-
-    val allBooks by bookViewModel.books.collectAsState()
+    
     val filters by bookViewModel.filters.collectAsState()
     val availableTags by bookViewModel.availableTags.collectAsState()
 
@@ -63,7 +63,7 @@ fun SearchScreen(
                 start = Dimens.SpaceXLarge,
                 top = Dimens.SpaceXLarge,
                 end = Dimens.SpaceXLarge
-            ),
+            ) ,
         verticalArrangement = Arrangement.spacedBy(Dimens.SpaceMedium)
     ) {
 
@@ -78,10 +78,25 @@ fun SearchScreen(
         }
 
         item {
-            SearchBar(
-                query = query,
-                onQueryChange = { bookViewModel.onSearchQueryChange(it) }
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+
+                BookFilterMenu(
+                    filters = filters,
+                    availableTags = availableTags,
+                    onToggleTag = bookViewModel::toggleTag,
+                    onOnlyWithFileChange = bookViewModel::setOnlyWithFile,
+                    onSortChange = bookViewModel::setSort,
+                    onClear = bookViewModel::clearFilters
+                )
+                SearchBar(
+                    query = query,
+                    onQueryChange = { bookViewModel.onSearchQueryChange(it) }
+                )
+            }
+
         }
 
         item {
@@ -96,22 +111,11 @@ fun SearchScreen(
             )
         }
 
-        item {
-            BookFilterMenu(
-                filters = filters,
-                availableTags = availableTags,
-                onToggleTag = bookViewModel::toggleTag,
-                onOnlyWithFileChange = bookViewModel::setOnlyWithFile,
-                onSortChange = bookViewModel::setSort,
-                onClear = bookViewModel::clearFilters
-            )
-        }
 
-
-        items(filteredBooks, key = {it.book.bookId}) { bookWithTags ->
+        items(filteredBooks , key = { it.book.bookId }) { bookWithTags ->
             SwipeToDeleteCard(
                 bookTitle = bookWithTags.book.title,
-                onDelete = { bookViewModel.deleteBook(bookWithTags.book.bookId)}
+                onDelete = { bookViewModel.deleteBook(bookWithTags.book.bookId) }
             ) {
                 BookTagCard(
                     bookWithTags = bookWithTags,
@@ -120,15 +124,15 @@ fun SearchScreen(
             }
         }
 
-        if (filteredBooks.isEmpty()){
+        if (filteredBooks.isEmpty()) {
             item {
                 Text(
-                    text = stringResource(R.string.no_books_yet),
+                    text = stringResource(R.string.no_books_yet) ,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = Dimens.SpaceXLarge),
-                    textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.bodyLarge,
+                        .padding(top = Dimens.SpaceXLarge) ,
+                    textAlign = TextAlign.Center ,
+                    style = MaterialTheme.typography.bodyLarge ,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
@@ -141,32 +145,34 @@ fun SearchScreen(
 
 @Composable
 fun BookTagCard(
-    bookWithTags: BookWithTags,
-    onClick: (BookWithTags) -> Unit = {}
+    bookWithTags : BookWithTags ,
+    onClick : (BookWithTags) -> Unit = {}
 ) {
 
     val book = bookWithTags.book
     val tags = bookWithTags.tags
 
-    Card( modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(Dimens.CornerXLarge),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+    Card(
+        modifier = Modifier.fillMaxWidth() ,
+        shape = RoundedCornerShape(Dimens.CornerXLarge) ,
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface) ,
         elevation = CardDefaults.cardElevation(defaultElevation = Dimens.SpaceMedium)
     ) {
 
-        Row(modifier = Modifier
-            .clickable { onClick(bookWithTags)}
-            .padding(Dimens.SpaceSmall)
+        Row(
+            modifier = Modifier
+                .clickable { onClick(bookWithTags) }
+                .padding(Dimens.SpaceSmall)
         )
-            {
+        {
 
             AsyncImage(
-                model = book.imageUri?: R.drawable.book_caver_example,
-                contentDescription = null,
+                model = book.imageUri ?: R.drawable.book_caver_example ,
+                contentDescription = null ,
                 modifier = Modifier
                     .width(Dimens.BookCoverWidthSmall)
                     .height(Dimens.BookCoverHeightSmall)
-                    .clip(RoundedCornerShape(Dimens.CornerSmall)),
+                    .clip(RoundedCornerShape(Dimens.CornerSmall)) ,
                 contentScale = ContentScale.Crop
             )
 
@@ -175,35 +181,35 @@ fun BookTagCard(
             Column(modifier = Modifier.fillMaxWidth()) {
 
                 Text(
-                    text = book.title,
-                    style = MaterialTheme.typography.headlineSmall,
+                    text = book.title ,
+                    style = MaterialTheme.typography.headlineSmall ,
                     color = MaterialTheme.colorScheme.onSurface
                 )
 
                 Spacer(modifier = Modifier.height(Dimens.SpaceXXSmall))
 
                 Text(
-                    text = book.author,
-                    style = MaterialTheme.typography.bodyMedium,
+                    text = book.author ,
+                    style = MaterialTheme.typography.bodyMedium ,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
                 Spacer(modifier = Modifier.height(Dimens.SpaceMedium))
 
                 FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(Dimens.SpaceSmall),
+                    horizontalArrangement = Arrangement.spacedBy(Dimens.SpaceSmall) ,
                     verticalArrangement = Arrangement.spacedBy(Dimens.SpaceXSmall)
                 ) {
-                    tags.take(MAX_TAGS_TO_SHOW).forEach { tag->
+                    tags.take(MAX_TAGS_TO_SHOW).forEach { tag ->
                         OutlinedTag(tag.name)
                     }
 
                     if (tags.size > MAX_TAGS_TO_SHOW) {
                         Text(
-                            modifier = Modifier.padding(Dimens.SpaceXXSmall),
-                            text = stringResource(R.string.more),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(Dimens.SpaceXXSmall) ,
+                            text = stringResource(R.string.more) ,
+                            style = MaterialTheme.typography.bodySmall ,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant ,
                             textDecoration = TextDecoration.Underline
                         )
                     }

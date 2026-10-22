@@ -27,15 +27,15 @@ import com.example.pocketlibrary.ui.theme.Dimens
 
 @Composable
 fun BookFormHeader(
-    screenTitle: String,
-    selectedImageUri: Uri?,
-    onImageClick: () -> Unit
+    screenTitle : String ,
+    selectedImageUri : Uri? ,
+    onImageClick : () -> Unit
 ) {
     Text(
-        text = screenTitle,
-        modifier = Modifier.fillMaxSize(),
-        textAlign = TextAlign.Center,
-        style = MaterialTheme.typography.titleLarge,
+        text = screenTitle ,
+        modifier = Modifier.fillMaxSize() ,
+        textAlign = TextAlign.Center ,
+        style = MaterialTheme.typography.titleLarge ,
         color = MaterialTheme.colorScheme.onSurface
     )
 
@@ -43,7 +43,7 @@ fun BookFormHeader(
 
     Box(
         modifier = Modifier
-            .fillMaxWidth(),
+            .fillMaxWidth() ,
         contentAlignment = Alignment.Center
     ) {
         Box(
@@ -53,26 +53,26 @@ fun BookFormHeader(
                 .clip(RoundedCornerShape(Dimens.CornerLarge))
                 .background(MaterialTheme.colorScheme.background)
                 .border(
-                    Dimens.BorderThin,
-                    MaterialTheme.colorScheme.surface,
+                    Dimens.BorderThin ,
+                    MaterialTheme.colorScheme.surface ,
                     RoundedCornerShape(Dimens.CornerLarge)
                 )
-                .clickable{onImageClick ()},
+                .clickable { onImageClick() } ,
             contentAlignment = Alignment.Center
         ) {
             if (selectedImageUri != null) {
                 AsyncImage(
-                    model = selectedImageUri,
-                    contentDescription = null,
+                    model = selectedImageUri ,
+                    contentDescription = null ,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(Dimens.CornerLarge)),
+                        .clip(RoundedCornerShape(Dimens.CornerLarge)) ,
                     contentScale = ContentScale.Crop
                 )
             } else {
                 Image(
-                    painter = painterResource(R.drawable.ic_image_placeholder),
-                    contentDescription = null,
+                    painter = painterResource(R.drawable.ic_image_placeholder) ,
+                    contentDescription = null ,
                 )
             }
         }

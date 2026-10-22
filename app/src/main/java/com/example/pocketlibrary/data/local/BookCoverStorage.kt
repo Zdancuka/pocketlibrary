@@ -16,32 +16,32 @@ object BookCoverStorage {
     private const val DIR_NAME = "covers"
     private const val MAX_SIDE_PX = 400
     private const val MAX_BASE64_CHARS = 600_000
-    private val QUALITIES = intArrayOf(75, 55, 40)
+    private val QUALITIES = intArrayOf(75 , 55 , 40)
 
-    fun isLocalUri(uri : String?): Boolean =
+    fun isLocalUri(uri : String?) : Boolean =
         uri != null && (uri.startsWith("content://") || uri.startsWith("file://"))
 
-    private fun coverDir (context: Context): File =
-        File(context.filesDir, DIR_NAME).apply {if (!exists()) mkdirs()}
+    private fun coverDir(context : Context) : File =
+        File(context.filesDir, DIR_NAME).apply { if (! exists()) mkdirs() }
 
-    fun encodeToBase64(context: Context, uriString: String): String? = try {
+    fun encodeToBase64(context : Context , uriString : String) : String? = try {
         val source = ImageDecoder.createSource(context.contentResolver, uriString.toUri())
-        val bitmap = ImageDecoder.decodeBitmap(source){ decoder, info, _ ->
+        val bitmap = ImageDecoder.decodeBitmap(source) { decoder, info, _ ->
             val w = info.size.width
             val h = info.size.height
-            val scale = min( 1f, MAX_SIDE_PX.toFloat() / max(w,h))
+            val scale = min(1f, MAX_SIDE_PX.toFloat() / max(w , h))
             decoder.setTargetSize(
-                (w * scale).roundToInt().coerceAtLeast(1),
+                (w * scale).roundToInt().coerceAtLeast(1) ,
                 (h * scale).roundToInt().coerceAtLeast(1)
             )
             decoder.allocator = ImageDecoder.ALLOCATOR_SOFTWARE
         }
-        var result: String? = null
-        for (quality in QUALITIES){
+        var result : String? = null
+        for (quality in QUALITIES) {
             val out = ByteArrayOutputStream()
             bitmap.compress(Bitmap.CompressFormat.JPEG, quality, out)
             val encoded = Base64.encodeToString(out.toByteArray(), Base64.NO_WRAP)
-            if (encoded.length <= MAX_BASE64_CHARS){
+            if (encoded.length <= MAX_BASE64_CHARS) {
                 result = encoded
                 break
             }
@@ -49,25 +49,25 @@ object BookCoverStorage {
 
         bitmap.recycle()
         result
-    } catch (e: Exception){
+    } catch (e : Exception) {
         android.util.Log.e("BookCoverStorage", "encode failed", e)
         null
     }
 
-    fun saveFromBase64(context: Context, bookId: String, base64: String): String? = try {
+    fun saveFromBase64(context : Context, bookId : String, base64 : String) : String? = try {
         val bytes = Base64.decode(base64, Base64.DEFAULT)
         deleteForBook(context, bookId)
-        val file = File(coverDir(context), "${bookId}_${System.currentTimeMillis()}.jpg")
+        val file = File(coverDir(context) , "${bookId}_${System.currentTimeMillis()}.jpg")
         file.writeBytes(bytes)
         Uri.fromFile(file).toString()
-    } catch (e: Exception){
-        android.util.Log.e("BookCoverStorage", "save failed", e)
+    } catch (e : Exception) {
+        android.util.Log.e("BookCoverStorage" , "save failed" , e)
         null
     }
 
-    fun deleteForBook(context: Context, bookId: String){
+    fun deleteForBook(context : Context, bookId : String) {
         coverDir(context)
-            .listFiles{f -> f.name.startsWith("${bookId}_")}
+            .listFiles { f -> f.name.startsWith("${bookId}_") }
             ?.forEach { it.delete() }
     }
 }

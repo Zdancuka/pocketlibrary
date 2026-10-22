@@ -6,6 +6,7 @@ import androidx.compose.ui.unit.dp
 object Dimens {
 
     // Spacing scale
+    val SpaceXXXSmall = 2.dp
     val SpaceXXSmall = 4.dp
     val SpaceXSmall = 8.dp
     val SpaceSmall = 10.dp
