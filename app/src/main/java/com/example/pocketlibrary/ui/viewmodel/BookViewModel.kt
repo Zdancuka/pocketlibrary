@@ -61,6 +61,11 @@ class BookViewModel(
             initialValue = emptyList()
         )
 
+    // Both of these should be private, with a read-only StateFlow exposed publicly.
+    // The rule: anything that starts with "val x = MutableStateFlow" in a ViewModel is a
+    // candidate for the backing-field pattern — it stops composables from writing directly:
+    //   private val _filters = MutableStateFlow(BookFilters())
+    //   val filters: StateFlow<BookFilters> = _filters
     val searchQuery = MutableStateFlow("")
 
     val filters = MutableStateFlow(BookFilters())
@@ -102,6 +107,8 @@ class BookViewModel(
     }
 
     fun clearFilters() {
+        // Sort order is not reset here — if that's intentional (user keeps their preferred sort),
+        // that's fine! But if "Clear" should reset everything, add: sort = BookSort.RECENT
         filters.update {
             it.copy(selectedTags = emptySet() , onlyWithFile = false)
         }

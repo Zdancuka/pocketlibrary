@@ -27,7 +27,7 @@ class PdfPageRenderer(file : File) {
 
     val pageCount : Int = renderer.pageCount
 
-    suspend fun renderPage(index : Int , targedWidthPx : Int) : Bitmap? =
+    suspend fun renderPage(index : Int , targedWidthPx : Int) : Bitmap? = // typo: targetWidthPx
         withContext(Dispatchers.IO) {
             mutex.withLock {
                 if (closed) return@withLock null
@@ -42,6 +42,11 @@ class PdfPageRenderer(file : File) {
             }
         }
 
+    // CoroutineScope(Dispatchers.IO) here is unmanaged — it's not tied to any lifecycle
+    // so it can't be cancelled if the app process dies mid-cleanup.
+    // Since renderer.close() and descriptor.close() are synchronous calls, you don't need a
+    // coroutine at all — just protect them with the mutex flag using runBlocking or a simple
+    // synchronized{} block, or move the cleanup into a suspend fun called from DisposableEffect.
     fun close() {
         CoroutineScope(Dispatchers.IO).launch {
             mutex.withLock {

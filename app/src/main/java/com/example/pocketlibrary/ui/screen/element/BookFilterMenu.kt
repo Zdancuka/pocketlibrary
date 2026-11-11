@@ -64,7 +64,7 @@ import kotlin.time.Duration.Companion.milliseconds
 
 private data class MenuPlacement(
     val maxHeightPx : Int,
-    val wightPx : Int,
+    val wightPx : Int, // typo: widthPx
     val anchorHeightPx : Int
 )
 
@@ -102,6 +102,16 @@ fun BookFilterMenu(
             onClick = {
                 focusManager.clearFocus()
                 keyboardController?.hide()
+                // Bug: scope.launch{} starts work in the background and returns immediately —
+                // it does NOT wait. So the code below (measuring bounds, expanded = true)
+                // runs right away while the keyboard is still visible, giving wrong measurements.
+                // Think of it like starting a timer and immediately reading the result before it finishes.
+                // Fix: move everything that depends on the keyboard being gone inside the launch block:
+                //   scope.launch {
+                //       withTimeoutOrNull(...) { /* wait for keyboard */ }
+                //       val bounds = ...   // now measure — keyboard is gone
+                //       expanded = true
+                //   }
                 scope.launch {
                     withTimeoutOrNull(KEYBOARD_HIDE_TIMEOUT) {
                         snapshotFlow { imeInsets.getBottom(density) }.first { it == 0 }

@@ -78,7 +78,7 @@ fun PdfReaderScreen(
         }
 
         val density = LocalDensity.current
-        val screenWithDp = LocalConfiguration.current.screenWidthDp
+        val screenWithDp = LocalConfiguration.current.screenWidthDp // typo: screenWidthDp
         val widthPx = remember (screenWithDp, density){
             with(density){ screenWithDp.dp.roundToPx()}.coerceAtMost(1600)
         }
@@ -155,7 +155,7 @@ fun PdfReaderScreen(
 
 
 @Composable
-private fun PdfPade(
+private fun PdfPade( // typo: PdfPage
     renderer: PdfPageRenderer,
     index: Int,
     widthPx: Int

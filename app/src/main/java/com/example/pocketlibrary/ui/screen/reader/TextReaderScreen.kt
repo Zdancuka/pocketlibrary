@@ -38,6 +38,11 @@ fun TextReaderScreen(
     var paragraphs by remember{ mutableStateOf<List<String>?>(null) }
     var loadFailed by remember { mutableStateOf(false) }
 
+    // readBookText is a one-shot suspend call — it loads the text once and stops.
+    // If the file is replaced later (user edits the book), this screen won't update automatically.
+    // The reactive pattern used elsewhere in the app would be to expose a StateFlow from ViewModel:
+    //   val bookText: StateFlow<String?> = _bookText   (collect it here with collectAsState())
+    // Then any change to the file automatically pushes a new value and the screen re-renders.
     LaunchedEffect (book.bookId, book.contentFileName) {
         val text = bookViewModel.readBookText(book)
         if (text == null) {

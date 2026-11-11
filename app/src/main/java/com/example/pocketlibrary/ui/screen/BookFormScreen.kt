@@ -103,6 +103,11 @@ fun BookFormScreen(
 
     var saved by remember { mutableStateOf(false) }
 
+    // Edge case (not trivial to fix, good to know): if the user picks a file and immediately
+    // presses Back, attachBookText and discardDraftBook may race — discard could run before
+    // the attach coroutine finishes and the book record isn't in the DB yet, so the cleanup
+    // is a no-op. After that, attachBookText inserts the record and leaves a stranded book.
+    // Safe to skip for now, just be aware it exists.
     DisposableEffect(Unit) {
         onDispose {
             if (isAddMode && !saved && attachedFileName != null){

@@ -18,7 +18,7 @@ object BookTextStorage {
     fun getFile(context : Context , fileName : String) : File =
         File(textDir(context) , fileName)
 
-    private fun looksLikePDf(file : File) : Boolean = try {
+    private fun looksLikePDf(file : File) : Boolean = try { // typo: looksLikePdf
         val head = ByteArray(1024)
         val read = file.inputStream().use { it.read(head) }
         read > 0 && String(head , 0 , read , Charsets.ISO_8859_1).contains("%PDF-")
