@@ -33,15 +33,15 @@ class AuthViewModel : ViewModel() {
         get() = auth.currentUser
 
     fun signUp(
-        email : String ,
-        password : String ,
+        email : String,
+        password : String,
         onSuccess : () -> Unit
     ) {
         viewModelScope.launch {
             isLoading = true
             errorMessage = null
             try {
-                auth.createUserWithEmailAndPassword(email , password).await()
+                auth.createUserWithEmailAndPassword(email, password).await()
                 isLoading = false
                 onSuccess()
             } catch (e : Exception) {
@@ -53,15 +53,15 @@ class AuthViewModel : ViewModel() {
 
 
     fun signIn(
-        email : String ,
-        password : String ,
+        email : String,
+        password : String,
         onSuccess : () -> Unit
     ) {
         viewModelScope.launch {
             isLoading = true
             errorMessage = null
             try {
-                auth.signInWithEmailAndPassword(email , password).await()
+                auth.signInWithEmailAndPassword(email, password).await()
                 isLoading = false
                 onSuccess()
             } catch (e : Exception) {
@@ -75,7 +75,7 @@ class AuthViewModel : ViewModel() {
         auth.signOut()
     }
 
-    private fun mapFirebaseError(e: Exception): String = when (e) {
+    private fun mapFirebaseError(e : Exception) : String = when (e) {
         is FirebaseAuthWeakPasswordException ->
             "Password is too weak. Use at least 6 characters."
 
@@ -89,7 +89,7 @@ class AuthViewModel : ViewModel() {
             e.localizedMessage ?: "Something went wrong. Please try again."
     }
 
-    fun clearError(){
+    fun clearError() {
         errorMessage = null
     }
 }

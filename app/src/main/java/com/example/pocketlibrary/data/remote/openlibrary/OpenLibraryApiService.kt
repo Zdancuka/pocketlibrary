@@ -15,7 +15,7 @@ interface OpenLibraryApiService {
     ) : OpenLibrarySearchResponse
 }
 
-object OpenLibraryClint {
+object OpenLibraryClient {
     val api : OpenLibraryApiService by lazy {
         Retrofit.Builder()
             .baseUrl("https://openlibrary.org/")

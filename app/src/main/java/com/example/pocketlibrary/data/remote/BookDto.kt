@@ -11,5 +11,6 @@ data class BookDto (
     val imageUri: String? = null,
     val updatedAt: Long = 0L,
     val tags: List<String> = emptyList(),
-    val deleted: Boolean = false
+    val deleted: Boolean = false,
+    val coverBase64: String? = null
 )

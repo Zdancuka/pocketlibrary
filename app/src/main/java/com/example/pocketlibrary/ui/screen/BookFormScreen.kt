@@ -1,7 +1,6 @@
 package com.example.pocketlibrary.ui.screen
 
 import android.content.Intent
-import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -35,6 +34,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -43,7 +43,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -64,19 +63,24 @@ import com.example.pocketlibrary.ui.screen.element.LabeledField
 import com.example.pocketlibrary.ui.screen.element.LabeledMultilineField
 import com.example.pocketlibrary.ui.screen.element.OpenLibraryResultRow
 import com.example.pocketlibrary.ui.theme.Dimens
+import com.example.pocketlibrary.ui.viewmodel.BookViewModel
 import com.example.pocketlibrary.ui.viewmodel.OpenLibrarySearchViewModel
+import java.util.UUID
 
 
 @Composable
 fun BookFormScreen(
-    bookWithTags : BookWithTags? ,
-    screenTitle : String ,
-    saveButtonText : String ,
-    onSave : (BookEntity , List<String>) -> Unit
+    bookWithTags: BookWithTags?,
+    screenTitle: String,
+    saveButtonText: String,
+    bookViewModel: BookViewModel,
+    onSave: (BookEntity, List<String>) -> Unit
 ) {
     val context = LocalContext.current
     val existingBook = bookWithTags?.book
     val isAddMode = bookWithTags == null
+
+    val workingBookId by remember { mutableStateOf(existingBook?.bookId ?: UUID.randomUUID().toString()) }
 
     var title by remember { mutableStateOf(existingBook?.title ?: "") }
     var author by remember { mutableStateOf(existingBook?.author ?: "") }
@@ -86,12 +90,26 @@ fun BookFormScreen(
     var notes by remember { mutableStateOf(existingBook?.bookNotes ?: "") }
     var tagInput by remember { mutableStateOf("") }
     var tags by remember { mutableStateOf(bookWithTags?.tags?.map { it.name } ?: emptyList()) }
-    var selectedImageUri by remember { mutableStateOf<Uri?>(existingBook?.imageUri?.toUri()) }
+    var selectedImageUri by remember { mutableStateOf(existingBook?.imageUri?.toUri()) }
+    var attachedFileName by remember { mutableStateOf(existingBook?.contentFileName) }
 
     val openLibraryViewMode : OpenLibrarySearchViewModel = viewModel()
     val searchQuery by openLibraryViewMode.query.collectAsState()
     val searchResults by openLibraryViewMode.results.collectAsState()
     val isSearching by openLibraryViewMode.isSearching.collectAsState()
+
+    var isAttachingText by remember { mutableStateOf(false) }
+    var textAttachFailed by remember { mutableStateOf(false) }
+
+    var saved by remember { mutableStateOf(false) }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            if (isAddMode && !saved && attachedFileName != null){
+                bookViewModel.discardDraftBook(workingBookId)
+            }
+        }
+    }
 
     fun applyOpenLibraryPick(doc : OpenLibraryDoc) {
         title = doc.title
@@ -109,6 +127,33 @@ fun BookFormScreen(
                 Intent.FLAG_GRANT_READ_URI_PERMISSION
             )
             selectedImageUri = uri
+        }
+    }
+
+    fun currentBookForText(): BookEntity =
+        existingBook?.copy(bookId = workingBookId, contentFileName = attachedFileName)
+            ?: BookEntity(
+                bookId = workingBookId,
+                title = title,
+                author = author,
+                contentFileName = attachedFileName
+            )
+
+    val textPickerLaunch = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument()
+    ) {
+        uri ->
+        if( uri != null){
+           isAttachingText = true
+           textAttachFailed = false
+
+           bookViewModel.attachBookText(currentBookForText(), uri) { update ->
+               isAttachingText = false
+               if (update != null) {
+                   attachedFileName = update.contentFileName
+                   } else{
+               textAttachFailed = true}
+           }
         }
     }
 
@@ -152,35 +197,35 @@ fun BookFormScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(Dimens.CornerSmall))
-                        .border(
-                            Dimens.BorderThin ,
-                            MaterialTheme.colorScheme.secondary,
-                            RoundedCornerShape(Dimens.CornerSmall)
-                        )
+//                        .border(
+//                            Dimens.BorderThin ,
+//                            MaterialTheme.colorScheme.secondary,
+//                            RoundedCornerShape(Dimens.CornerSmall)
+//                        )
                         .background(MaterialTheme.colorScheme.surfaceVariant)
                         .padding(Dimens.SpaceSmall)
                 ) {
                     Text(
-                        text = stringResource(R.string.search_online) ,
-                        fontWeight = FontWeight.SemiBold ,
+                        text = stringResource(R.string.search_online),
+                        fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.onSurface
                     )
 
                     Spacer(modifier = Modifier.height(Dimens.SpaceXXSmall))
 
                     TextField(
-                        value = searchQuery ,
-                        onValueChange = { openLibraryViewMode.onQueryChange(it) } ,
-                        placeholder = { Text(stringResource(R.string.search_by_title_or_author)) } ,
+                        value = searchQuery,
+                        onValueChange = { openLibraryViewMode.onQueryChange(it) },
+                        placeholder = { Text(stringResource(R.string.search_by_title_or_author)) },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clip(RoundedCornerShape(Dimens.CornerXSmall)) ,
-                        singleLine = true ,
-                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search) ,
+                            .clip(RoundedCornerShape(Dimens.CornerXSmall)),
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                         colors = TextFieldDefaults.colors(
-                            unfocusedContainerColor = MaterialTheme.colorScheme.surface ,
-                            focusedContainerColor = MaterialTheme.colorScheme.surface ,
-                            unfocusedIndicatorColor = Color.Transparent ,
+                            unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                            focusedContainerColor = MaterialTheme.colorScheme.surface,
+                            unfocusedIndicatorColor = Color.Transparent,
                             focusedIndicatorColor = Color.Transparent
                         )
                     )
@@ -189,24 +234,93 @@ fun BookFormScreen(
 
                     if (isSearching) {
                         Box(
-                            modifier = Modifier.fillMaxWidth() ,
+                            modifier = Modifier.fillMaxWidth(),
                             contentAlignment = Alignment.Center
                         ) {
                             CircularProgressIndicator()
                         }
                     }
+                }
+            }
 
-                    searchResults.forEach { doc ->
-                        Spacer(modifier = Modifier.height(Dimens.SpaceXXSmall))
-                        OpenLibraryResultRow(
-                            doc = doc ,
-                            onClick = { applyOpenLibraryPick(doc) }
-                            )
+            items(searchResults) { doc ->
+                OpenLibraryResultRow(doc = doc, onClick = { applyOpenLibraryPick(doc) })
+            }
+        }
+
+            item {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(Dimens.CornerSmall))
+                        .border(
+                            Dimens.BorderThin ,
+                            MaterialTheme.colorScheme.secondary ,
+                            RoundedCornerShape(Dimens.CornerSmall)
+                        )
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                        .padding(Dimens.SpaceSmall)
+                ) {
+                    Text(
+                        text = stringResource(R.string.book_text) ,
+                        fontWeight = FontWeight.SemiBold ,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+
+                    Spacer(modifier = Modifier.height(Dimens.SpaceXXSmall))
+
+                    if (attachedFileName != null) {
+                        Text(
+                            text = stringResource(R.string.text_attached) ,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant ,
+                            style = MaterialTheme.typography.bodySmall
+                        )
                         Spacer(modifier = Modifier.height(Dimens.SpaceXSmall))
+                    }
+
+                    Row(horizontalArrangement = Arrangement.spacedBy(Dimens.SpaceSmall)) {
+                        Button(
+                            onClick = { textPickerLaunch.launch(arrayOf("text/plain", "application/pdf")) } ,
+                            enabled = !isAttachingText
+                        ) {
+                            Text(
+                                text = if (attachedFileName != null)
+                                    stringResource(R.string.replace_text_file)
+                                else
+                                    stringResource(R.string.attach_text_file)
+                            )
+                        }
+
+                        if (attachedFileName != null) {
+                            Button(
+                                onClick = { bookViewModel.removeBookText(currentBookForText()){
+                                    attachedFileName = null
+                                } } ,
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.error ,
+                                    contentColor = MaterialTheme.colorScheme.onError
+                                )
+                            ) {
+                                Text(stringResource(R.string.remove))
+                            }
+                        }
+                    }
+
+                    if (isAttachingText) {
+                        Spacer(modifier = Modifier.height(Dimens.SpaceXSmall))
+                        CircularProgressIndicator()
+                    }
+
+                    if (textAttachFailed) {
+                        Spacer(modifier = Modifier.height(Dimens.SpaceXSmall))
+                        Text(
+                            text = stringResource(R.string.text_file_too_large) ,
+                            color = MaterialTheme.colorScheme.error ,
+                            style = MaterialTheme.typography.bodySmall
+                        )
                     }
                 }
             }
-        }
 
         item {
             LabeledField(
@@ -346,6 +460,7 @@ fun BookFormScreen(
         item {
             Button(
                 onClick = {
+                    saved = true
                     val pageCount = pageCountText.toIntOrNull()
                     val bookToSave = existingBook?.copy(
                         title = title ,
@@ -354,15 +469,18 @@ fun BookFormScreen(
                         pageNumber = pageCount ,
                         bookDescription = description ,
                         bookNotes = notes ,
-                        imageUri = selectedImageUri?.toString()
+                        imageUri = selectedImageUri?.toString(),
+                        contentFileName = attachedFileName
                     ) ?: BookEntity(
+                        bookId = workingBookId,
                         title = title ,
                         author = author ,
                         language = language ,
                         pageNumber = pageCount ,
                         bookDescription = description ,
                         bookNotes = notes ,
-                        imageUri = selectedImageUri?.toString()
+                        imageUri = selectedImageUri?.toString(),
+                        contentFileName = attachedFileName
                     )
                     onSave(bookToSave , tags)
                 } ,
